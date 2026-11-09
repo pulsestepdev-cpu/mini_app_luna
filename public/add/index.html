@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>LUNA</title>
+    <!-- Иконка и название ярлыка на экране телефона -->
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="../favicon-64.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="LUNA" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#2F1D4E" />
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+        color: #fff; background: #2F1D4E url('../art/welcome-bg.webp') center / cover no-repeat;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 32px 24px calc(env(safe-area-inset-bottom) + 32px); text-align: center;
+      }
+      .icon { width: 96px; height: 96px; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.35); }
+      h1 { font-family: Georgia, serif; font-weight: 500; letter-spacing: .08em; font-size: 40px; margin: 18px 0 6px; }
+      p { margin: 0 0 18px; color: rgba(255,255,255,.85); line-height: 1.5; font-size: 16px; }
+      .card { background: rgba(31,21,52,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 18px 18px 6px; text-align: left; max-width: 380px; width: 100%; }
+      ol { margin: 0; padding-left: 22px; }
+      li { margin: 0 0 12px; line-height: 1.45; font-size: 15.5px; }
+      b { color: #F8D2E0; }
+      .btn { display: block; width: 100%; max-width: 380px; margin-top: 18px; padding: 15px; border-radius: 999px; background: linear-gradient(#fff, #EFE5F9); color: #472B72; font-weight: 600; font-size: 16px; text-decoration: none; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <img class="icon" src="../icon-512.png" alt="" />
+    <h1>LUNA</h1>
+
+    <div id="launch" class="hidden">
+      <p>Открываю LUNA в Telegram…</p>
+    </div>
+
+    <div id="install">
+      <p>Добавь LUNA на экран телефона —<br />открывать в одно касание ♡</p>
+      <div class="card">
+        <ol id="ios" class="hidden">
+          <li>Открой эту страницу в <b>Safari</b> (если она открылась внутри Telegram — нажми значок компаса или «Открыть в Safari»).</li>
+          <li>Нажми <b>«Поделиться»</b> — квадрат со стрелкой вверх внизу экрана.</li>
+          <li>Пролистай и выбери <b>«На экран „Домой“»</b> → <b>«Добавить»</b>.</li>
+        </ol>
+        <ol id="android" class="hidden">
+          <li>Открой эту страницу в <b>Chrome</b> (если она открылась внутри Telegram — нажми «⋮» → «Открыть в браузере»).</li>
+          <li>Нажми <b>«⋮»</b> вверху справа.</li>
+          <li>Выбери <b>«Добавить на главный экран»</b> (или «Установить приложение») → <b>«Добавить»</b>.</li>
+        </ol>
+        <ol id="other" class="hidden">
+          <li>Открой эту страницу на телефоне.</li>
+        </ol>
+      </div>
+      <p style="margin-top: 16px; font-size: 14px">Иконка LUNA будет открывать приложение в Telegram.</p>
+    </div>
+
+    <a id="open" class="btn" href="https://t.me/luna_tracker_bot?startapp">Открыть LUNA</a>
+
+    <script>
+      var BOT = 'luna_tracker_bot';
+      var standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches || /[?&]launch=1/.test(location.search);
+      var ua = navigator.userAgent;
+      var ios = /iPhone|iPad|iPod/.test(ua);
+      var android = /Android/.test(ua);
+
+      if (standalone) {
+        // Запуск с иконки на экране — сразу в Telegram
+        document.getElementById('install').className = 'hidden';
+        document.getElementById('launch').className = '';
+        location.href = 'tg://resolve?domain=' + BOT + '&startapp';
+        setTimeout(function () { location.href = 'https://t.me/' + BOT + '?startapp'; }, 1500);
+      } else {
+        document.getElementById(ios ? 'ios' : android ? 'android' : 'other').className = '';
+      }
+    </script>
+  </body>
+</html>

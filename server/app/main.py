@@ -233,7 +233,7 @@ async def delete_data(user: TgUser = Depends(current_user)) -> dict:
 
 # ---------- приложение (статика) ----------
 # Явно: на некоторых системах .webp/.woff2 по умолчанию отдаются как text/plain
-for _ext, _type in {".webp": "image/webp", ".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".js": "text/javascript", ".svg": "image/svg+xml"}.items():
+for _ext, _type in {".webp": "image/webp", ".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".js": "text/javascript", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json"}.items():
     mimetypes.add_type(_type, _ext)
 
 if settings.static_dir.exists():

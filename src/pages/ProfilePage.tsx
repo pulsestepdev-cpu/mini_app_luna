@@ -2,6 +2,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Camera, Check, FlaskConical, Globe, ImageUp, Info, Lock, MoonStar, Send, Smartphone, UserRound, Vibrate, Volume2 } from 'lucide-react';
 import { useHomeScreen } from '@/features/profile/homeScreen';
+import { HomeScreenHelp } from '@/components/HomeScreenHelp';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { fmt } from '@/utils/date';
@@ -157,6 +158,7 @@ export function ProfilePage() {
         </div>
         <p className="mt-3 px-1 text-[13px] text-ink-muted">עברית и English появятся в следующих версиях.</p>
       </Sheet>
+      <HomeScreenHelp open={home.helpOpen} onClose={home.closeHelp} />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart3, BookOpen, CalendarDays, ChevronRight, Droplet, NotebookPen, Settings, Smartphone, Sparkles, X } from 'lucide-react';
 import { useHomeScreen } from '@/features/profile/homeScreen';
+import { HomeScreenHelp } from '@/components/HomeScreenHelp';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { useCycle } from '@/features/cycle/useCycle';
@@ -194,6 +195,7 @@ export function HomePage() {
 
       <p className="mt-4 text-center text-[11.5px] text-ink-faint">{t.home.approxNote}</p>
       <MarkPeriodSheet open={markOpen} onClose={() => setMarkOpen(false)} />
+      <HomeScreenHelp open={home.helpOpen} onClose={home.closeHelp} />
     </div>
   );
 }

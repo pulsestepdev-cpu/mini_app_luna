@@ -25,6 +25,7 @@ interface TelegramWebApp {
   showConfirm?(message: string, cb: (ok: boolean) => void): void;
   requestWriteAccess?(cb?: (granted: boolean) => void): void;
   openTelegramLink?(url: string): void;
+  openLink?(url: string, options?: { try_instant_view?: boolean }): void;
   addToHomeScreen?(): void;
   checkHomeScreenStatus?(cb: (status: 'unsupported' | 'unknown' | 'added' | 'missed') => void): void;
   CloudStorage?: import('@/features/backup/cloud').CloudStorageApi;
