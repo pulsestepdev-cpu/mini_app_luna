@@ -40,8 +40,8 @@ def chroma_key(img: Image.Image, tol: float, soft: float) -> Image.Image:
     near_obj = np.minimum(near_obj, key_excess * tol)
     denom = np.maximum(key_excess - near_obj, key_excess * 0.3)
     alpha_mix = np.clip((key_excess - excess) / denom, 0.0, 1.0)
-    # Явный объект и явный фон — без полутонов (порог tol / tol+soft)
-    alpha = np.where(sim <= tol, 1.0, np.where(sim >= tol + soft + 0.4, 0.0, alpha_mix))
+    # Явный объект и явный фон — без полутонов (виньетка генератора по углам — тоже фон)
+    alpha = np.where(sim <= tol, 1.0, np.where(sim >= 0.8, 0.0, alpha_mix))
 
     # Краевой пиксель — смесь объекта и фона: C = a·F + (1−a)·K.
     # Восстанавливаем чистый цвет объекта F, иначе по краю остаётся серо-зелёная обводка.
@@ -59,7 +59,7 @@ def chroma_key(img: Image.Image, tol: float, soft: float) -> Image.Image:
 
 def crop_and_resize(img: Image.Image, max_side: int, pad: float) -> Image.Image:
     a = np.asarray(img)[..., 3]
-    ys, xs = np.where(a > 8)
+    ys, xs = np.where(a > 24)
     if len(xs):
         x0, x1, y0, y1 = xs.min(), xs.max(), ys.min(), ys.max()
         p = int(max(x1 - x0, y1 - y0) * pad)

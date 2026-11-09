@@ -251,10 +251,11 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
   );
 }
 
-export function EmptyState({ icon, title, text, action }: { icon?: ReactNode; title: string; text?: string; action?: ReactNode }) {
+export function EmptyState({ icon, art, title, text, action }: { icon?: ReactNode; art?: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="glass flex flex-col items-center px-6 py-8 text-center">
-      {icon && <div className="mb-3 rounded-full bg-plum-100 p-3 text-plum-600">{icon}</div>}
+      {art && <div className="mb-3 animate-floaty">{art}</div>}
+      {icon && !art && <div className="mb-3 rounded-full bg-plum-100 p-3 text-plum-600">{icon}</div>}
       <div className="text-[16px] font-semibold text-ink">{title}</div>
       {text && <p className="mt-1.5 text-[14px] leading-relaxed text-ink-muted">{text}</p>}
       {action && <div className="mt-4 w-full">{action}</div>}

@@ -7,6 +7,7 @@ import { computeAnalytics, type RangeKey } from '@/features/analytics/stats';
 import { plural, todayKey } from '@/utils/date';
 import { Card, EmptyState, PageHeader, Segmented, SectionTitle } from '@/components/ui';
 import { LengthBars } from '@/components/LengthBars';
+import { Illustration } from '@/components/art';
 
 const RANGES: RangeKey[] = ['1m', '3m', '6m', '1y'];
 
@@ -65,7 +66,7 @@ export function AnalyticsPage() {
             caption={`${tA.basedOn} ${a.cyclePoints.length} ${plural(a.cyclePoints.length, tA.cyclesWord)}`}
           />
         ) : (
-          <EmptyState title={tA.notEnough} text={range === '1y' ? tA.notEnoughText : `${tA.notEnoughText} Попробуй выбрать период побольше.`} />
+          <EmptyState art={<Illustration name="moon" className="h-28 w-28" />} title={tA.notEnough} text={range === '1y' ? tA.notEnoughText : `${tA.notEnoughText} Попробуй выбрать период побольше.`} />
         )}
         {a.periodPoints.length >= 2 && (
           <div className="mt-3">

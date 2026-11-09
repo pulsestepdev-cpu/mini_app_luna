@@ -35,7 +35,7 @@ export function ArticlesPage() {
                 <Clock size={13} /> {featured.minutes} {t.articles.minutes}
               </div>
             </div>
-            <FlowerArt className="absolute -bottom-4 -right-3 h-32 w-32 opacity-90" />
+            <FlowerArt className="absolute -bottom-6 right-3 h-40 w-24 rotate-6" />
           </button>
         </div>
       )}

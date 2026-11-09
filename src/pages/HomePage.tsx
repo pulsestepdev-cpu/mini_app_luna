@@ -6,7 +6,7 @@ import { useLunaStore } from '@/store/useLunaStore';
 import { useCycle } from '@/features/cycle/useCycle';
 import { articleForPhase, getArticle } from '@/content/articles';
 import { daysWord, fmtRange } from '@/utils/date';
-import { Avatar, FlowerArt, LotusIcon, MoonPhase } from '@/components/art';
+import { Avatar, FlowerArt, Illustration, MoonPhase } from '@/components/art';
 import { useCountUp } from '@/utils/motion';
 import { currentStreak } from '@/features/streak/streak';
 import type { Phase } from '@/types';
@@ -47,7 +47,7 @@ export function HomePage() {
 
       {!p ? (
         <EmptyState
-          icon={<LotusIcon size={28} />}
+          art={<Illustration name="moon" className="h-36 w-36" />}
           title={t.home.noData}
           text={t.home.noDataText}
           action={<Button onClick={() => setMarkOpen(true)}>{t.home.markPeriod}</Button>}
@@ -154,7 +154,7 @@ export function HomePage() {
           <div className="mt-1.5 text-[16px] font-semibold leading-snug">{article.title}</div>
           <div className="mt-1 text-[13px] leading-snug text-white/75">{t.home.selfCare}</div>
         </div>
-        <FlowerArt className="absolute -bottom-3 -right-2 h-32 w-32 animate-floaty opacity-95" />
+        <FlowerArt className="absolute -bottom-6 right-3 h-40 w-24 rotate-6 animate-floaty" />
       </button>
 
       <p className="mt-4 text-center text-[11.5px] text-ink-faint">{t.home.approxNote}</p>

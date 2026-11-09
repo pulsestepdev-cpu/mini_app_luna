@@ -19,72 +19,21 @@ export function LotusIcon({ size = 32, className }: { size?: number; className?:
   );
 }
 
-/** Светящийся лотос — экран «Ты молодец» */
+/** Светящийся лотос — экран «Ты молодец». Сгенерирован на чёрном; чёрное переведено в прозрачность (яркость → альфа) */
 export function LotusArt({ className }: { className?: string }) {
-  const petal = 'M100 128 C 82 102, 82 62, 100 26 C 118 62, 118 102, 100 128 Z';
-  const back = [-62, -40, 40, 62];
-  const mid = [-22, 22];
-  return (
-    <svg viewBox="0 0 200 170" overflow="visible" className={cn('overflow-visible drop-shadow-[0_0_30px_rgba(255,190,240,0.6)]', className)}>
-      <defs>
-        <radialGradient id="lotus-glow" cx="50%" cy="65%" r="50%">
-          <stop offset="0%" stopColor="#FFE6FA" stopOpacity="0.95" />
-          <stop offset="45%" stopColor="#F2B8EA" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="#B88BE8" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="petal-back" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFF4FD" />
-          <stop offset="100%" stopColor="#D9A6EE" />
-        </linearGradient>
-        <linearGradient id="petal-front" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="60%" stopColor="#F7C9EE" />
-          <stop offset="100%" stopColor="#E59AD9" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="100" cy="105" rx="100" ry="58" fill="url(#lotus-glow)" />
-      {back.map((a) => (
-        <path key={a} d={petal} fill="url(#petal-back)" opacity="0.75" transform={`rotate(${a} 100 128)`} stroke="#FFF" strokeOpacity="0.6" strokeWidth="0.8" />
-      ))}
-      {mid.map((a) => (
-        <path key={a} d={petal} fill="url(#petal-front)" opacity="0.92" transform={`rotate(${a} 100 128)`} stroke="#FFF" strokeOpacity="0.8" strokeWidth="0.8" />
-      ))}
-      <path d={petal} fill="url(#petal-front)" stroke="#FFF" strokeWidth="1" />
-      <path d="M100 40 L100 118" stroke="#FFF" strokeOpacity="0.6" strokeWidth="1" />
-      <ellipse cx="100" cy="132" rx="60" ry="7" fill="#F6D2F3" opacity="0.55" />
-    </svg>
-  );
+  return <img src="./art/success-lotus.webp" alt="" draggable={false} className={cn('pointer-events-none select-none', className)} />;
 }
 
 /** Розовый цветок — декор карточек */
 export function FlowerArt({ className }: { className?: string }) {
-  const angles = [0, 60, 120, 180, 240, 300];
-  return (
-    <svg viewBox="0 0 120 120" className={className}>
-      <defs>
-        <radialGradient id="fl-petal" cx="50%" cy="90%" r="90%">
-          <stop offset="0%" stopColor="#E56FA3" />
-          <stop offset="55%" stopColor="#F4A9CB" />
-          <stop offset="100%" stopColor="#FDE3EF" />
-        </radialGradient>
-        <radialGradient id="fl-center" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFE49A" />
-          <stop offset="100%" stopColor="#F2B04E" />
-        </radialGradient>
-      </defs>
-      <path d="M58 70 C 54 92, 48 104, 40 118" stroke="#9C7BB8" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-      <path d="M50 96 C 36 90, 30 96, 26 104 C 36 106, 44 104, 50 96 Z" fill="#B79AD3" opacity="0.8" />
-      <g transform="translate(60 52)">
-        {angles.map((a) => (
-          <ellipse key={a} cx="0" cy="-20" rx="13" ry="22" fill="url(#fl-petal)" transform={`rotate(${a})`} opacity="0.95" stroke="#FFF" strokeOpacity="0.5" />
-        ))}
-        {angles.map((a) => (
-          <ellipse key={`i${a}`} cx="0" cy="-11" rx="7" ry="12" fill="#F9C2DB" transform={`rotate(${a + 30})`} />
-        ))}
-        <circle r="7" fill="url(#fl-center)" />
-      </g>
-    </svg>
-  );
+  return <img src="./art/flower.webp" alt="" draggable={false} className={cn('pointer-events-none select-none object-contain', className)} />;
+}
+
+/** Иллюстрации пустых состояний и знакомства (вырезаны из зелёного фона) */
+const ART = { moon: './art/empty-moon.webp', seedling: './art/empty-seedling.webp', hello: './art/setup-hello.webp' } as const;
+
+export function Illustration({ name, className }: { name: keyof typeof ART; className?: string }) {
+  return <img src={ART[name]} alt="" draggable={false} className={cn('pointer-events-none select-none object-contain', className)} />;
 }
 
 /** Мерцающие звёзды поверх тёмного фона */

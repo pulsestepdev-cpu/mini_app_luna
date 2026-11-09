@@ -152,13 +152,13 @@ main subject slightly off-center.
 
 ## Чек-лист
 
-- [ ] success-lotus.png
-- [ ] flower.png
-- [ ] app-icon.png
-- [ ] bot-preview.png
-- [ ] empty-moon.png
-- [ ] empty-seedling.png
-- [ ] setup-hello.png
+- [x] success-lotus.png
+- [x] flower.png
+- [x] app-icon.png
+- [x] bot-preview.png
+- [x] empty-moon.png
+- [x] empty-seedling.png
+- [x] setup-hello.png
 - [ ] 13 обложек статей
 
 Луну с фазами в кольце на главной рисует код: она растёт и убывает вместе с циклом, поэтому картинка для неё не нужна.

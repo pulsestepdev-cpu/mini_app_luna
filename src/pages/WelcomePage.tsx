@@ -39,7 +39,7 @@ export function WelcomePage() {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: "url('./art/welcome-bg.png'), linear-gradient(180deg, #3B2559 0%, #5E3896 55%, #B9A3E0 100%)",
+          backgroundImage: "url('./art/welcome-bg.webp'), linear-gradient(180deg, #3B2559 0%, #5E3896 55%, #B9A3E0 100%)",
         }}
       />
       {/* Дополнительное свечение луны и затемнение под кнопкой */}

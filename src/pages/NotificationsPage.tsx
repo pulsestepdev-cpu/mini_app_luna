@@ -49,7 +49,7 @@ export function NotificationsPage() {
           <Bell size={30} className="mx-auto text-plum-600" strokeWidth={1.6} />
           <div className="mt-2 text-[16px] font-semibold text-ink">{t.notifications.cardTitle}</div>
           <div className="mt-1 text-[13.5px] text-ink-soft">{t.notifications.cardText}</div>
-          <FlowerArt className="absolute -bottom-6 -right-4 h-28 w-28 opacity-90" />
+          <FlowerArt className="absolute -bottom-8 right-3 h-36 w-20 rotate-6" />
         </div>
       </div>
     </div>

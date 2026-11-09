@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '@/i18n';
+import { Illustration } from '@/components/art';
 import { useLunaStore } from '@/store/useLunaStore';
 import { todayKey } from '@/utils/date';
 import { Button, Chip, PageHeader } from '@/components/ui';
@@ -29,7 +30,8 @@ export function SetupPage() {
     <div className="app-bg mx-auto min-h-full max-w-[440px] pb-10">
       <PageHeader title={t.setup.title} back />
       <div className="space-y-4 px-5">
-        <p className="px-1 text-[14px] leading-relaxed text-ink-muted">{t.setup.subtitle}</p>
+        <Illustration name="hello" className="mx-auto -mt-2 h-32 w-32 animate-floaty" />
+        <p className="px-1 text-center text-[14px] leading-relaxed text-ink-muted">{t.setup.subtitle}</p>
 
         <div className="glass p-4">
           <label className="mb-2 block text-[14px] font-semibold">{t.setup.name}</label>

@@ -6,6 +6,7 @@ import { useLunaStore } from '@/store/useLunaStore';
 import { buildInsights, type Insight, type InsightTone } from '@/features/insights/rules';
 import { cn } from '@/utils/cn';
 import { EmptyState, PageHeader, SectionTitle } from '@/components/ui';
+import { Illustration } from '@/components/art';
 
 const ICONS: Record<InsightTone, { icon: typeof Star; cls: string }> = {
   positive: { icon: Star, cls: 'bg-amber-100 text-amber-500' },
@@ -29,7 +30,7 @@ export function InsightsPage() {
     <div>
       <PageHeader title={t.insights.title} back />
       <div className="space-y-3 px-5">
-        {onlyTip && <EmptyState icon={<Star size={22} />} title={t.analytics.notEnough} text={t.insights.empty} />}
+        {onlyTip && <EmptyState art={<Illustration name="seedling" className="h-32 w-24" />} title={t.analytics.notEnough} text={t.insights.empty} />}
         {main.map((i) => <InsightCard key={i.id} insight={i} />)}
         {attention.length > 0 && (
           <>
