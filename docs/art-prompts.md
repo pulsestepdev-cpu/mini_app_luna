@@ -8,7 +8,7 @@
 2. **Первым сообщением прикрепи `public/art/welcome-bg.png`** (это уже готовый фон приветствия) и напиши:
    > This is the style reference for my app LUNA. Keep this exact style, palette and mood for every image I ask for in this chat.
 3. Перед каждым промтом вставляй **общий стиль** (блок ниже) и сам промт.
-4. **Прозрачный фон** нужен там, где написано *«прозрачный фон»*. Если ChatGPT нарисовал фон, попроси: `Same image, but with a transparent background, PNG`.
+4. **Прозрачный фон у ChatGPT не просим, получается плохо.** Где нужен вырезанный объект, генерируем на **зелёном фоне** (помечено 🟩), а фон убирает Claude скриптом `scripts/chroma_key.py`. Светящийся лотос генерируем на **чёрном фоне** (⬛), в приложении чёрное исчезает само. Блоки для вставки ниже.
 5. Если результат не нравится, проси точечно: «сделай мягче», «меньше деталей», «цвет лепестков розовее». Это работает лучше, чем генерировать заново.
 6. Скачивай в максимальном качестве. Размер указан у каждой картинки, ChatGPT умеет делать 1024×1024, 1536×1024 и 1024×1536.
 
@@ -22,28 +22,49 @@ Smooth gradients, soft light, minimal composition with lots of breathing room.
 No text, no letters, no numbers, no watermark, no logos, no frames.
 ```
 
+### 🟩 Зелёный фон (вставлять в конце промта, где стоит 🟩)
+
+```
+Background: a perfectly flat, solid pure green (#00FF00) chroma key background,
+evenly lit, no gradient, no texture, no vignette.
+The object must have crisp, clean edges. NO glow, halo, light rays, sparkles,
+smoke or shadows outside the object — nothing semi-transparent over the green.
+Do not use any green color in the object itself.
+```
+
+Почему так: чёткий край вырезается идеально, а свечение поверх зелёного превращается в грязно‑серое пятно. Свечение, искры и тени приложение дорисует само.
+
+### ⬛ Чёрный фон (только для светящегося лотоса)
+
+```
+Background: pure solid black (#000000), completely flat, no stars, no texture.
+The glow and light around the object are welcome — they will be blended
+onto a dark app screen.
+```
+
 ---
 
 ## 1. Главные иллюстрации (самое важное, делать первыми)
 
 ### 1.1 `success-lotus.png`: светящийся лотос
 **Где:** экран «Ты молодец!» после сохранения самочувствия. Фон экрана тёмно-фиолетовый.
-**Размер:** 1024×1024, **прозрачный фон.**
+**Размер:** 1024×1024, ⬛ **чёрный фон.**
 ```
 A single luminous lotus flower seen from the front at a slight angle, petals glowing
 from within in pearl white and soft pink, delicate golden light at the center,
-tiny sparkles floating around it, soft halo glow. Centered, the flower fills about 70%
-of the frame. Transparent background, PNG.
+soft halo glow around it. Centered, the flower fills about 70% of the frame.
++ блок ⬛ «Чёрный фон»
 ```
 
 ### 1.2 `flower.png`: розовый цветок-декор
 **Где:** карточка «Для твоей фазы» на главной и в статьях (на фиолетовом фоне), карточка напоминаний (на светлом фоне).
-**Размер:** 1024×1024, **прозрачный фон.**
+**Размер:** 1024×1024, 🟩 **зелёный фон.**
 ```
 One delicate pink flower with six soft petals and a warm golden center, on a slender
-curved lavender stem with one small leaf. Gentle glow around the petals, soft painterly
-shading, slightly dreamy. The flower is in the upper part of the frame, the stem goes
-down to the bottom edge. Transparent background, PNG.
+curved lavender stem with one small lavender leaf. Soft painterly shading inside
+the petals, slightly dreamy. The flower is in the upper part of the frame, the stem
+goes down to the bottom edge.
++ блок 🟩 «Зелёный фон»
 ```
 
 ### 1.3 `app-icon.png`: иконка бота и приложения
@@ -71,29 +92,31 @@ Leave the left half calm and empty for a title. Wide 16:9 composition.
 
 ### 2.1 `empty-moon.png`: спящая луна
 **Где:** главная до первой отметки месячных, аналитика «Недостаточно данных».
-**Размер:** 1024×1024, **прозрачный фон.**
+**Размер:** 1024×1024, 🟩 **зелёный фон.**
 ```
 A cute sleepy crescent moon with closed eyes resting on a small fluffy pink cloud,
-three tiny stars around, soft glow. Simple, sweet, minimal, centered.
-Transparent background, PNG.
+two tiny solid stars touching the cloud. Simple, sweet, minimal, centered.
++ блок 🟩 «Зелёный фон»
 ```
 
 ### 2.2 `empty-seedling.png`: росток в лунном свете
 **Где:** «Твои инсайты», пока закономерностей ещё нет («появятся через пару циклов»).
-**Размер:** 1024×1024, **прозрачный фон.**
+**Размер:** 1024×1024, 🟩 **зелёный фон.**
 ```
-A tiny glowing seedling with two leaves sprouting from a small pot, a soft crescent
-moon glow above it, a few floating sparkles. Hopeful, gentle, minimal, centered.
-Transparent background, PNG.
+A tiny seedling with two soft lavender-pink leaves sprouting from a small pastel
+plum pot, a little solid crescent moon hanging above it on a thin golden thread.
+Hopeful, gentle, minimal, centered.
++ блок 🟩 «Зелёный фон»
 ```
 
 ### 2.3 `setup-hello.png`: знакомство
 **Где:** верх экрана «Давай познакомимся» (первая настройка).
-**Размер:** 1536×1024, **прозрачный фон.**
+**Размер:** 1536×1024, 🟩 **зелёный фон.**
 ```
-A small glowing crescent moon gently waving hello with a tiny hand made of light,
-surrounded by a few stars and a little pink cloud. Friendly, welcoming, minimal,
-lots of empty space around. Transparent background, PNG.
+A cute small crescent moon character with a gentle smile waving hello with a tiny
+hand, sitting on a little fluffy pink cloud, two small solid stars next to it.
+Friendly, welcoming, minimal, lots of empty space around.
++ блок 🟩 «Зелёный фон»
 ```
 
 ---
@@ -101,7 +124,7 @@ lots of empty space around. Transparent background, PNG.
 ## 3. Обложки статей
 
 **Где:** список статей (миниатюры) и шапка каждой статьи.
-**Размер:** 1536×1024, **без прозрачности.** Без людей с детально прорисованными лицами, только силуэты или предметы. Это смотрится спокойнее.
+**Размер:** 1536×1024, **обычный фон на всю картинку, ничего вырезать не нужно.** Без людей с детально прорисованными лицами, только силуэты или предметы. Это смотрится спокойнее.
 
 Перед каждым промтом добавляй ещё одну строку:
 ```
