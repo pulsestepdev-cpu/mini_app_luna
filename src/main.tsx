@@ -9,8 +9,12 @@ import '@fontsource/cormorant-garamond/600.css';
 import './styles/index.css';
 import { App } from './app/App';
 import { initTelegram } from './app/telegram';
+import { applyTheme } from './app/theme';
+import { useLunaStore } from './store/useLunaStore';
 
 initTelegram();
+// Тема — до первой отрисовки, чтобы не мелькал светлый экран
+applyTheme(useLunaStore.getState().prefs.theme);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

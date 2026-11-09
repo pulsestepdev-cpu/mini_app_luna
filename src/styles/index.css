@@ -3,10 +3,47 @@
 @tailwind utilities;
 
 @layer base {
+  /* Светлая тема (по умолчанию) — каналы RGB для Tailwind */
+  :root {
+    color-scheme: light;
+    --ink: 43 33 64; --ink-soft: 74 63 94; --ink-muted: 133 122 150; --ink-faint: 180 170 194;
+    --plum-50: 247 242 252; --plum-100: 239 229 249; --plum-200: 224 207 243; --plum-300: 201 174 232; --plum-400: 168 132 214;
+    --plum-500: 138 96 196; --plum-600: 116 72 177; --plum-700: 94 56 150; --plum-800: 71 43 114; --plum-900: 47 29 78;
+    --rose-100: 252 232 239; --rose-200: 248 210 224; --rose-400: 238 138 170; --rose-500: 226 97 138; --rose-600: 201 68 111;
+    --sky-100: 227 238 251; --sky-200: 202 221 246; --sky-500: 110 151 214;
+    --amber-100: 253 240 220; --amber-300: 245 201 138; --amber-500: 233 162 59;
+    --emerald-50: 236 253 245; --emerald-700: 4 120 87;
+    --surface: 255 255 255; --edge: 255 255 255; --sheet: 251 248 254; --moon-dark: 217 198 239;
+    --body: #EDE3F7;
+    --glass-a: rgba(255, 255, 255, 0.82); --glass-b: rgba(255, 255, 255, 0.58); --glass-edge: rgba(255, 255, 255, 0.7);
+    --strong: rgba(255, 255, 255, 0.9);
+    --bg: radial-gradient(120% 60% at 100% 0%, rgba(233, 206, 240, 0.9) 0%, transparent 60%),
+      radial-gradient(90% 50% at 0% 100%, rgba(214, 196, 245, 0.8) 0%, transparent 60%),
+      linear-gradient(180deg, #F6F0FC 0%, #EFE4F9 50%, #EADDF6 100%);
+  }
+  /* Тёмная тема «лунная ночь» */
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --ink: 243 238 250; --ink-soft: 213 203 228; --ink-muted: 167 156 187; --ink-faint: 122 112 144;
+    --plum-50: 31 23 51; --plum-100: 44 32 71; --plum-200: 61 44 97; --plum-300: 87 65 138; --plum-400: 138 107 196;
+    --plum-500: 154 120 214; --plum-600: 185 152 232; --plum-700: 205 182 240; --plum-800: 222 207 246; --plum-900: 239 230 251;
+    --rose-100: 58 29 46; --rose-200: 92 40 67; --rose-400: 240 141 176; --rose-500: 242 123 163; --rose-600: 246 158 187;
+    --sky-100: 28 42 68; --sky-200: 38 64 107; --sky-500: 143 180 236;
+    --amber-100: 58 44 23; --amber-300: 233 182 106; --amber-500: 242 182 92;
+    --emerald-50: 21 48 42; --emerald-700: 127 221 184;
+    --surface: 40 30 64; --edge: 92 76 128; --sheet: 29 22 46; --moon-dark: 72 58 105;
+    --body: #120D20;
+    --glass-a: rgba(50, 38, 80, 0.8); --glass-b: rgba(34, 26, 56, 0.64); --glass-edge: rgba(150, 125, 200, 0.16);
+    --strong: rgba(44, 33, 70, 0.92);
+    --bg: radial-gradient(120% 60% at 100% 0%, rgba(96, 58, 142, 0.5) 0%, transparent 60%),
+      radial-gradient(90% 50% at 0% 100%, rgba(62, 42, 118, 0.55) 0%, transparent 60%),
+      linear-gradient(180deg, #18122B 0%, #141024 50%, #110C1F 100%);
+  }
+
   html, body, #root { height: 100%; }
   body {
     @apply font-sans text-ink antialiased;
-    background: #EDE3F7;
+    background: var(--body);
     -webkit-tap-highlight-color: transparent;
     /* без «резинки» и случайного pull-to-refresh в WebView */
     overscroll-behavior-y: none;
@@ -28,22 +65,19 @@
 
 @layer components {
   /* Светлый лавандовый фон приложения */
-  .app-bg {
-    background:
-      radial-gradient(120% 60% at 100% 0%, rgba(233, 206, 240, 0.9) 0%, transparent 60%),
-      radial-gradient(90% 50% at 0% 100%, rgba(214, 196, 245, 0.8) 0%, transparent 60%),
-      linear-gradient(180deg, #F6F0FC 0%, #EFE4F9 50%, #EADDF6 100%);
-  }
+  .app-bg { background: var(--bg); }
   /* Стеклянная карточка */
   .glass {
-    @apply rounded-2.5xl border border-white/70 shadow-card;
-    background: linear-gradient(160deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.58) 100%);
+    @apply rounded-2.5xl border shadow-card;
+    border-color: var(--glass-edge);
+    background: linear-gradient(160deg, var(--glass-a) 0%, var(--glass-b) 100%);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
   }
   .glass-strong {
-    @apply rounded-2.5xl border border-white/80 shadow-card;
-    background: rgba(255,255,255,0.9);
+    @apply rounded-2.5xl border shadow-card;
+    border-color: var(--glass-edge);
+    background: var(--strong);
   }
   .tap { @apply transition-transform duration-150 active:scale-[0.97]; }
   .h-title { @apply text-[22px] font-bold tracking-tight text-ink; }

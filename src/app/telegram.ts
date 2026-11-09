@@ -6,6 +6,9 @@
 interface TelegramWebApp {
   initData: string;
   platform: string;
+  colorScheme?: 'light' | 'dark';
+  onEvent?(event: string, cb: () => void): void;
+  offEvent?(event: string, cb: () => void): void;
   ready(): void;
   expand(): void;
   isVersionAtLeast(v: string): boolean;
@@ -59,13 +62,8 @@ export function initTelegram() {
   try {
     tg.ready();
     tg.expand(); // открыть на всю высоту, а не половиной экрана
-    if (tg.isVersionAtLeast('6.1')) {
-      tg.setHeaderColor('#F6F0FC');
-      tg.setBackgroundColor('#EDE3F7');
-    }
     // На iOS свайп вниз при прокрутке иначе сворачивает приложение
     if (tg.isVersionAtLeast('7.7')) tg.disableVerticalSwipes?.();
-    if (tg.isVersionAtLeast('7.10')) tg.setBottomBarColor?.('#FFFFFF');
     document.documentElement.dataset.tg = tg.platform;
   } catch {
     /* старый клиент Telegram — работаем как обычная страница */

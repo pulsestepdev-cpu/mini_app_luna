@@ -25,10 +25,11 @@ export function Button({
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant }) {
   const styles: Record<BtnVariant, string> = {
-    primary: 'bg-gradient-to-b from-plum-500 to-plum-600 text-white shadow-button',
+    primary: 'bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-button',
     soft: 'bg-plum-200/70 text-plum-800',
-    light: 'bg-gradient-to-b from-white to-plum-100 text-plum-800 shadow-soft',
-    ghost: 'bg-white/60 text-plum-700 border border-white/80',
+    // только на тёмных экранах (приветствие, успех) — цвета фиксированные
+    light: 'bg-gradient-to-b from-white to-[#EFE5F9] text-brand-800 shadow-soft',
+    ghost: 'bg-surface/60 text-plum-700 border border-edge/80',
     danger: 'bg-rose-100 text-rose-600',
   };
   return (
@@ -62,7 +63,7 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
       }}
       className={cn(
         'relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors duration-200',
-        checked ? 'bg-gradient-to-r from-plum-500 to-plum-600' : 'bg-plum-100 ring-1 ring-inset ring-plum-200/60',
+        checked ? 'bg-gradient-to-r from-brand-500 to-brand-600' : 'bg-plum-100 ring-1 ring-inset ring-plum-200/60',
       )}
     >
       <span
@@ -89,8 +90,8 @@ export function Chip({ active, onClick, children, className }: { active?: boolea
       className={cn(
         'tap rounded-full px-4 py-2.5 text-[14px] font-medium transition-colors',
         active
-          ? 'bg-plum-600 text-white shadow-soft'
-          : 'border border-white/80 bg-white/70 text-ink-soft shadow-[0_2px_8px_-4px_rgba(110,70,170,0.25)]',
+          ? 'bg-brand-600 text-white shadow-soft'
+          : 'border border-edge/80 bg-surface/70 text-ink-soft shadow-[0_2px_8px_-4px_rgba(110,70,170,0.25)]',
         className,
       )}
     >
@@ -112,7 +113,7 @@ export function Segmented<T extends string>({ value, options, onChange }: { valu
           }}
           className={cn(
             'tap flex-1 rounded-full py-2 text-[13px] font-medium transition-colors',
-            value === o.value ? 'border border-plum-300 bg-white text-ink shadow-soft' : 'text-ink-muted',
+            value === o.value ? 'border border-plum-300 bg-surface text-ink shadow-soft' : 'text-ink-muted',
           )}
         >
           {o.label}
@@ -142,7 +143,7 @@ export function ProgressRing({ value, size = 96, stroke = 7, children }: { value
             <stop offset="100%" stopColor="#7448B1" />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#EFE5F9" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgb(var(--plum-100))" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -156,7 +157,7 @@ export function ProgressRing({ value, size = 96, stroke = 7, children }: { value
           style={{ transition: 'stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)' }}
         />
       </svg>
-      <div className="absolute inset-[14%] flex items-center justify-center rounded-full bg-gradient-to-br from-white to-plum-50 shadow-inner">
+      <div className="absolute inset-[14%] flex items-center justify-center rounded-full bg-gradient-to-br from-surface to-plum-50 shadow-inner">
         {children}
       </div>
     </div>
@@ -174,8 +175,8 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   if (!open) return null;
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <div className="absolute inset-0 animate-fadeIn bg-plum-900/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="relative w-full max-w-[440px] animate-sheetUp rounded-t-4xl bg-[#FBF8FE] px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3 shadow-2xl">
+      <div className="absolute inset-0 animate-fadeIn bg-brand-900/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative w-full max-w-[440px] animate-sheetUp rounded-t-4xl bg-sheet px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3 shadow-2xl">
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-plum-200" />
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="text-[18px] font-bold text-ink">{title}</div>
@@ -231,7 +232,7 @@ export function IconTile({ icon, label, onClick, active, value }: { icon: ReactN
       }
       className={cn(
         'tap flex flex-col items-center justify-center gap-1.5 rounded-2xl border px-1 py-3.5 text-center transition-colors',
-        active ? 'border-plum-300 bg-plum-100/90 shadow-soft' : 'border-white/80 bg-white/70 shadow-[0_2px_10px_-4px_rgba(110,70,170,0.2)]',
+        active ? 'border-plum-300 bg-plum-100/90 shadow-soft' : 'border-edge/80 bg-surface/70 shadow-[0_2px_10px_-4px_rgba(110,70,170,0.2)]',
       )}
     >
       <span className={cn('text-ink-soft', active && 'text-plum-700')}>{icon}</span>
@@ -265,7 +266,7 @@ export function Toast({ text }: { text: string | null }) {
   if (!text) return null;
   return createPortal(
     <div className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+16px)] z-[60] flex justify-center">
-      <div className="animate-fadeUp rounded-full bg-plum-800/90 px-5 py-2.5 text-[14px] font-medium text-white shadow-lg">{text}</div>
+      <div className="animate-fadeUp rounded-full bg-brand-800/90 px-5 py-2.5 text-[14px] font-medium text-white shadow-lg">{text}</div>
     </div>,
     document.body,
   );

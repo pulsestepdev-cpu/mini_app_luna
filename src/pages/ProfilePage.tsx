@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, FlaskConical, Globe, Info, Lock, UserRound, Vibrate, Volume2 } from 'lucide-react';
+import { Bell, Check, FlaskConical, Globe, Info, Lock, MoonStar, UserRound, Vibrate, Volume2 } from 'lucide-react';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { fmt } from '@/utils/date';
 import { Avatar } from '@/components/art';
-import { Button, ListRow, Sheet, Toggle } from '@/components/ui';
+import { Button, ListRow, Segmented, Sheet, Toggle } from '@/components/ui';
+import type { ThemePref } from '@/types';
 import { haptic, sound } from '@/utils/feedback';
 
 export function ProfilePage() {
@@ -34,6 +35,20 @@ export function ProfilePage() {
 
       <h2 className="h-section mb-2.5 mt-6 px-1">{t.profile.feel}</h2>
       <div className="glass divide-y divide-plum-100/70 overflow-hidden p-0">
+        <div className="px-4 py-3.5">
+          <div className="mb-2.5 flex items-center gap-3">
+            <MoonStar size={20} className="text-ink-soft" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[15px] text-ink">{t.profile.theme}</div>
+              <div className="text-[12px] leading-snug text-ink-muted">{t.profile.themeHint}</div>
+            </div>
+          </div>
+          <Segmented<ThemePref>
+            value={prefs.theme}
+            onChange={(v) => updatePrefs({ theme: v })}
+            options={(['auto', 'light', 'dark'] as const).map((v) => ({ value: v, label: t.profile.themes[v] }))}
+          />
+        </div>
         <PrefRow
           icon={<Vibrate size={20} />}
           label={t.profile.haptics}

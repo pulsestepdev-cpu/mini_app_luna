@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { HashRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { startAutoBackup } from '@/features/backup/autoBackup';
+import { useThemeSync } from './theme';
 import { useLunaStore } from '@/store/useLunaStore';
 import { AppLayout } from './AppLayout';
 import { WelcomePage } from '@/pages/WelcomePage';
@@ -27,6 +28,7 @@ function RequireOnboarding() {
 
 export function App() {
   useEffect(() => startAutoBackup(), []);
+  useThemeSync();
   return (
     <HashRouter>
       <Routes>

@@ -61,7 +61,7 @@ export function LengthBars({ title, info, points, average, itemLabel, badge, cap
         {average != null && (
           <div className="pointer-events-none absolute inset-x-0 z-10" style={{ bottom: `${pct(average)}%` }}>
             <div className="border-t-[1.5px] border-dashed border-plum-400/80" />
-            <span className="absolute -top-[19px] right-0 rounded-md bg-white/85 px-1.5 text-[11.5px] font-medium leading-[17px] text-plum-700">
+            <span className="absolute -top-[19px] right-0 rounded-md bg-surface/85 px-1.5 text-[11.5px] font-medium leading-[17px] text-plum-700">
               {t.analytics.avgShort} {daysWord(average)}
             </span>
           </div>

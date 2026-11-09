@@ -20,7 +20,7 @@ export function LogSummary({ log }: { log: DailyLog }) {
       {items.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {items.map((i) => (
-            <div key={i.label} className="rounded-xl bg-white/80 px-3 py-2">
+            <div key={i.label} className="rounded-xl bg-surface/80 px-3 py-2">
               <div className="text-[11.5px] text-ink-muted">{i.label}</div>
               <div className="text-[14px] font-medium">{i.value}</div>
             </div>
@@ -36,7 +36,7 @@ export function LogSummary({ log }: { log: DailyLog }) {
           ))}
         </div>
       )}
-      {log.notes && <p className="rounded-xl bg-white/80 px-3 py-2 text-[14px] italic text-ink-soft">«{log.notes}»</p>}
+      {log.notes && <p className="rounded-xl bg-surface/80 px-3 py-2 text-[14px] italic text-ink-soft">«{log.notes}»</p>}
     </div>
   );
 }

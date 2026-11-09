@@ -31,7 +31,7 @@ export function MyDataPage() {
             maxLength={40}
             onChange={(e) => setName(e.target.value)}
             placeholder={t.setup.namePlaceholder}
-            className="w-full rounded-xl border border-plum-100 bg-white/80 px-4 py-3 text-[15px] outline-none focus:border-plum-300"
+            className="w-full rounded-xl border border-plum-100 bg-surface/80 px-4 py-3 text-[15px] outline-none focus:border-plum-300"
           />
         </div>
         <CycleFields value={cycle} onChange={setCycle} />

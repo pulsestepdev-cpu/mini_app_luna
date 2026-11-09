@@ -26,7 +26,7 @@ export function ArticlesPage() {
         <div className="px-5">
           <button
             onClick={() => nav(`/articles/${featured.slug}`)}
-            className="tap relative mb-4 w-full overflow-hidden rounded-2.5xl bg-gradient-to-br from-plum-400 via-plum-500 to-plum-700 p-5 text-left text-white shadow-button"
+            className="tap relative mb-4 w-full overflow-hidden rounded-2.5xl bg-gradient-to-br from-brand-400 via-brand-500 to-brand-700 p-5 text-left text-white shadow-button"
           >
             <div className="relative z-10 max-w-[68%]">
               <div className="text-[12px] font-medium uppercase tracking-wide text-white/70">{t.articles.forPhase}</div>

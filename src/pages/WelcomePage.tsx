@@ -34,7 +34,7 @@ export function WelcomePage() {
   };
 
   return (
-    <div className="relative mx-auto flex min-h-full max-w-[440px] flex-col overflow-hidden bg-plum-900 text-white">
+    <div className="relative mx-auto flex min-h-full max-w-[440px] flex-col overflow-hidden bg-brand-900 text-white">
       {/* Фон: сгенерированная иллюстрация, при её отсутствии — градиент */}
       <div
         className="absolute inset-0 bg-cover bg-center"
@@ -44,7 +44,7 @@ export function WelcomePage() {
       />
       {/* Дополнительное свечение луны и затемнение под кнопкой */}
       <div className="absolute left-1/2 top-[6%] h-56 w-56 rounded-full bg-[#F6D9F8]/20 blur-3xl" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-plum-900/55 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-brand-900/55 to-transparent" />
       <StarField count={14} className="opacity-70" />
 
       <div className="relative flex flex-1 flex-col items-center px-8 pt-[38vh] text-center">
@@ -57,7 +57,7 @@ export function WelcomePage() {
       </div>
 
       <div className="relative px-8 pb-[calc(env(safe-area-inset-bottom)+36px)]">
-        <Button variant="light" onClick={() => nav(onboarded ? '/' : '/setup')} className="text-plum-800">
+        <Button variant="light" onClick={() => nav(onboarded ? '/' : '/setup')} className="text-brand-800">
           {t.welcome.start}
         </Button>
         <div className="mt-5 flex flex-col items-center gap-2 text-[13px] text-white/80">

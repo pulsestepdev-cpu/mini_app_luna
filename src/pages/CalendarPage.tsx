@@ -151,7 +151,7 @@ function DayCell({ date, marks, inMonth, isToday, hasLog, onClick }: { date: Dat
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-full text-[14px]',
           bg,
-          isToday && 'bg-gradient-to-b from-plum-500 to-plum-700 font-bold text-white shadow-soft ring-0 border-0',
+          isToday && 'bg-gradient-to-b from-brand-500 to-brand-700 font-bold text-white shadow-soft ring-0 border-0',
         )}
       >
         {Number(date.slice(8))}

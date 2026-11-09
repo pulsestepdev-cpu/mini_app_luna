@@ -52,7 +52,7 @@ export function AppLayout({ tabs = false }: { tabs?: boolean }) {
         <Outlet />
       </main>
       {tabs && (
-        <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[440px] border-t border-white/70 bg-white/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+        <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[440px] border-t border-edge/70 bg-surface/80 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
           <div className="flex px-1 pb-2 pt-2">
             {TABS.map(({ to, label, icon: Icon, end, also }) => {
               const extra = also?.some((p) => pathname.startsWith(p));

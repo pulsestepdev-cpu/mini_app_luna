@@ -103,9 +103,9 @@ export function CheckInPage() {
               onChange={(e) => setOtherText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addCustom()}
               placeholder={t.checkin.otherPlaceholder}
-              className="flex-1 rounded-full border border-plum-100 bg-white/80 px-4 py-2.5 text-[14px] outline-none focus:border-plum-300"
+              className="flex-1 rounded-full border border-plum-100 bg-surface/80 px-4 py-2.5 text-[14px] outline-none focus:border-plum-300"
             />
-            <button onClick={addCustom} className="tap rounded-full bg-plum-600 px-4 text-[14px] font-medium text-white">
+            <button onClick={addCustom} className="tap rounded-full bg-brand-600 px-4 text-[14px] font-medium text-white">
               {t.checkin.add}
             </button>
           </div>

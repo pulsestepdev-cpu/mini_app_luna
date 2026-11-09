@@ -38,7 +38,7 @@ export function SetupPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder={t.setup.namePlaceholder}
             maxLength={40}
-            className="w-full rounded-xl border border-plum-100 bg-white/80 px-4 py-3 text-[15px] outline-none focus:border-plum-300"
+            className="w-full rounded-xl border border-plum-100 bg-surface/80 px-4 py-3 text-[15px] outline-none focus:border-plum-300"
           />
         </div>
 
@@ -50,7 +50,7 @@ export function SetupPage() {
             max={todayKey()}
             disabled={unknownDate}
             onChange={(e) => setLastPeriod(e.target.value)}
-            className="w-full rounded-xl border border-plum-100 bg-white/80 px-4 py-3 text-[15px] outline-none focus:border-plum-300 disabled:opacity-40"
+            className="w-full rounded-xl border border-plum-100 bg-surface/80 px-4 py-3 text-[15px] outline-none focus:border-plum-300 disabled:opacity-40"
           />
           <div className="mt-3">
             <Chip active={unknownDate} onClick={() => setUnknownDate(!unknownDate)}>

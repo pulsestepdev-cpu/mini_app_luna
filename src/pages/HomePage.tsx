@@ -145,7 +145,7 @@ export function HomePage() {
       {/* Карточка дня */}
       <button
         onClick={() => nav(`/articles/${article.slug}`)}
-        className="tap relative mt-5 flex w-full items-center overflow-hidden rounded-2.5xl bg-gradient-to-br from-plum-500 via-plum-600 to-plum-800 p-5 text-left text-white shadow-button"
+        className="tap relative mt-5 flex w-full items-center overflow-hidden rounded-2.5xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800 p-5 text-left text-white shadow-button"
       >
         <div className="relative z-10 max-w-[64%]">
           <div className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-wide text-white/70">
@@ -166,7 +166,7 @@ export function HomePage() {
 function QuickAction({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
   return (
     <button onClick={() => { haptic.tap(); onClick(); }} className="tap flex flex-col items-center gap-1.5">
-      <span className="flex h-14 w-14 items-center justify-center rounded-full border border-white/80 bg-white/75 text-plum-600 shadow-card">{icon}</span>
+      <span className="flex h-14 w-14 items-center justify-center rounded-full border border-edge/80 bg-surface/75 text-plum-600 shadow-card">{icon}</span>
       <span className="whitespace-pre-line text-center text-[11.5px] leading-tight text-ink-soft">{label}</span>
     </button>
   );

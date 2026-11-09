@@ -1,14 +1,25 @@
+/** Цвет из CSS-переменной (значения для светлой и тёмной темы — в src/styles/index.css) */
+const v = (name) => 'rgb(var(--' + name + ') / <alpha-value>)';
+const scale = (name, steps) => Object.fromEntries(steps.map((s) => [s, v(name + '-' + s)]));
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        ink: { DEFAULT: '#2B2140', soft: '#4A3F5E', muted: '#857A96', faint: '#B4AAC2' },
-        plum: { 50: '#F7F2FC', 100: '#EFE5F9', 200: '#E0CFF3', 300: '#C9AEE8', 400: '#A884D6', 500: '#8A60C4', 600: '#7448B1', 700: '#5E3896', 800: '#472B72', 900: '#2F1D4E' },
-        rose: { 100: '#FCE8EF', 200: '#F8D2E0', 400: '#EE8AAA', 500: '#E2618A', 600: '#C9446F' },
-        sky: { 100: '#E3EEFB', 200: '#CADDF6', 500: '#6E97D6' },
-        amber: { 100: '#FDF0DC', 300: '#F5C98A', 500: '#E9A23B' },
+        // Меняются вместе с темой
+        ink: { DEFAULT: v('ink'), soft: v('ink-soft'), muted: v('ink-muted'), faint: v('ink-faint') },
+        plum: scale('plum', [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]),
+        rose: scale('rose', [100, 200, 400, 500, 600]),
+        sky: scale('sky', [100, 200, 500]),
+        amber: scale('amber', [100, 300, 500]),
+        emerald: scale('emerald', [50, 700]),
+        surface: v('surface'), // фон карточек и полей (белый в светлой теме)
+        edge: v('edge'), // светлые обводки
+        sheet: v('sheet'), // фон нижних шторок
+        // Фирменный фиолетовый — одинаковый в обеих темах (кнопки, тёмные экраны)
+        brand: { 400: '#A884D6', 500: '#8A60C4', 600: '#7448B1', 700: '#5E3896', 800: '#472B72', 900: '#2F1D4E' },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],

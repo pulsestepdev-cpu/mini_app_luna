@@ -32,7 +32,7 @@ export function MarkPeriodSheet({ open, onClose }: { open: boolean; onClose: () 
         value={date}
         max={today}
         onChange={(e) => setDate(e.target.value || today)}
-        className="mb-5 w-full rounded-xl border border-plum-100 bg-white px-4 py-3 text-[15px] outline-none focus:border-plum-300"
+        className="mb-5 w-full rounded-xl border border-plum-100 bg-surface px-4 py-3 text-[15px] outline-none focus:border-plum-300"
       />
       <Button onClick={save}>{t.common.save}</Button>
     </Sheet>

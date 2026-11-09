@@ -122,7 +122,7 @@ export function Avatar({ name, size = 44 }: { name: string; size?: number }) {
   const letter = (name.trim()[0] ?? '♡').toUpperCase();
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-200 via-plum-200 to-plum-400 font-serif font-semibold text-white shadow-soft ring-2 ring-white"
+      className="flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-200 via-plum-200 to-plum-400 font-serif font-semibold text-white shadow-soft ring-2 ring-surface"
       style={{ width: size, height: size, fontSize: size * 0.45 }}
     >
       {letter}
@@ -156,7 +156,7 @@ export function MoonPhase({ progress, size = 48, className }: { progress: number
         </clipPath>
       </defs>
       {/* Тёмная часть диска */}
-      <circle cx="50" cy="50" r="40" fill="#D9C6EF" />
+      <circle cx="50" cy="50" r="40" fill="rgb(var(--moon-dark))" />
       <circle cx="50" cy="50" r="40" fill="none" stroke="#C9AEE8" strokeWidth="1.2" />
       {/* Освещённая часть + мягкие «кратеры» */}
       <g clipPath={`url(#${id}-clip)`}>
