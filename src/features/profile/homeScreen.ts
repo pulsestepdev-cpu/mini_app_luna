@@ -4,6 +4,13 @@ import { getTelegram } from '@/app/telegram';
 /** Ярлык LUNA на главном экране телефона (Telegram Bot API 8.0+) */
 export type HomeStatus = 'unsupported' | 'unknown' | 'added' | 'missed';
 
+/**
+ * ВЫКЛЮЧЕНО по просьбе владельца (на Android запускалась установка через браузер).
+ * Код оставлен: чтобы вернуть кнопку «Добавить на экран телефона» на главной и в профиле,
+ * поставь true. Страница установки public/add/ остаётся, но в приложении на неё нет ссылок.
+ */
+export const HOME_SCREEN_ENABLED = false;
+
 /** Сколько ждём системное окно Telegram, прежде чем показать инструкцию */
 const PROMPT_WAIT_MS = 2500;
 
@@ -19,7 +26,7 @@ export function useHomeScreen() {
 
   useEffect(() => {
     const tg = getTelegram();
-    if (!tg) return;
+    if (!HOME_SCREEN_ENABLED || !tg) return;
     const native = tg.isVersionAtLeast('8.0') && !!tg.addToHomeScreen;
     // Телефон без нативной функции — всё равно можно добавить вручную по инструкции
     setStatus(native ? 'unknown' : isPhone() ? 'missed' : 'unsupported');

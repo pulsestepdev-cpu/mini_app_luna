@@ -60,6 +60,8 @@ No linter is configured; `tsc` with `strict`, `noUnusedLocals`, `noUnusedParamet
 
 **Profile photo:** `features/profile/avatar.ts` — custom photo (`profile.photo`, 256px JPEG data URL) → Telegram `initDataUnsafe.user.photo_url` (if `profile.useTelegramPhoto !== false`) → initial letter. The Telegram URL is read per session, never stored.
 
+**Home screen shortcut — disabled.** `features/profile/homeScreen.ts` (`HOME_SCREEN_ENABLED = false`, owner's request): Telegram `addToHomeScreen` + fallback help sheet + `public/add/` install page. With the flag off the hook reports `unsupported`, so the Home tip and Profile row don't render. Flip the flag to bring it back.
+
 ## Deploy
 
 One CapRover app `luna-mini-app` (created with persistent data) at https://luna-mini-app.2.28.66.82.nip.io: `captain-definition` → `Dockerfile` (node stage: npm ci → `npm test` → build; python stage: pip → `pytest` → uvicorn on :80 serving `dist` + API + bot). Cache headers are set in `main.py` (`index.html` no-cache, `/assets` immutable, `/api` no-store). CapRover pulls `main` via a GitHub webhook, so every push to `main` redeploys — any failing test (JS or Python) blocks the deploy. Only one bot instance may poll at a time: never run the server locally with the real token while production is up. Setup steps (BotFather, CapRover env vars, persistent dir `/data`, Mini App linking) are in `docs/telegram/README.md`.
