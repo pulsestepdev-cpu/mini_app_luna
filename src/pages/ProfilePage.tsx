@@ -1,0 +1,90 @@
+import { useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Check, FlaskConical, Globe, Info, Lock, UserRound, Vibrate, Volume2 } from 'lucide-react';
+import { t } from '@/i18n';
+import { useLunaStore } from '@/store/useLunaStore';
+import { fmt } from '@/utils/date';
+import { Avatar } from '@/components/art';
+import { Button, ListRow, Sheet, Toggle } from '@/components/ui';
+import { haptic, sound } from '@/utils/feedback';
+
+export function ProfilePage() {
+  const nav = useNavigate();
+  const profile = useLunaStore((s) => s.profile);
+  const seedDemo = useLunaStore((s) => s.seedDemo);
+  const [langOpen, setLangOpen] = useState(false);
+  const prefs = useLunaStore((s) => s.prefs);
+  const updatePrefs = useLunaStore((s) => s.updatePrefs);
+
+  return (
+    <div className="px-5 pt-[calc(env(safe-area-inset-top)+28px)]">
+      <div className="flex flex-col items-center text-center">
+        <Avatar name={profile.name} size={96} />
+        <div className="mt-3 text-[20px] font-bold">{profile.name || 'LUNA'} ♡</div>
+        <div className="text-[13px] text-ink-muted">{t.profile.since} {fmt(profile.createdAt.slice(0, 10), 'MMMM yyyy')}</div>
+      </div>
+
+      <div className="glass mt-6 divide-y divide-plum-100/70 overflow-hidden p-0">
+        <ListRow icon={<UserRound size={20} />} label={t.profile.myData} onClick={() => nav('/profile/data')} />
+        <ListRow icon={<Bell size={20} />} label={t.profile.notifications} onClick={() => nav('/profile/notifications')} />
+        <ListRow icon={<Lock size={20} />} label={t.profile.privacy} onClick={() => nav('/profile/privacy')} />
+        <ListRow icon={<Globe size={20} />} label={t.profile.language} value={t.profile.languageValue} onClick={() => setLangOpen(true)} />
+        <ListRow icon={<Info size={20} />} label={t.profile.about} onClick={() => nav('/profile/about')} />
+      </div>
+
+      <h2 className="h-section mb-2.5 mt-6 px-1">{t.profile.feel}</h2>
+      <div className="glass divide-y divide-plum-100/70 overflow-hidden p-0">
+        <PrefRow
+          icon={<Vibrate size={20} />}
+          label={t.profile.haptics}
+          hint={t.profile.hapticsHint}
+          checked={prefs.haptics}
+          onChange={(v) => {
+            updatePrefs({ haptics: v });
+            if (v) haptic.success();
+          }}
+        />
+        <PrefRow
+          icon={<Volume2 size={20} />}
+          label={t.profile.sounds}
+          hint={t.profile.soundsHint}
+          checked={prefs.sounds}
+          onChange={(v) => {
+            updatePrefs({ sounds: v });
+            if (v) sound.chime(); // сразу дать услышать, как звучит
+          }}
+        />
+      </div>
+
+      {import.meta.env.DEV && (
+        <div className="mt-6">
+          <Button variant="soft" onClick={() => { seedDemo(); nav('/'); }}>
+            <FlaskConical size={18} /> {t.profile.demo}
+          </Button>
+          <p className="mt-1.5 text-center text-[11.5px] text-ink-faint">{t.profile.demoHint}</p>
+        </div>
+      )}
+
+      <Sheet open={langOpen} onClose={() => setLangOpen(false)} title={t.profile.language}>
+        <div className="glass-strong flex items-center justify-between px-4 py-3.5">
+          <span className="text-[15px]">🇷🇺 Русский</span>
+          <Check size={20} className="text-plum-600" />
+        </div>
+        <p className="mt-3 px-1 text-[13px] text-ink-muted">עברית и English появятся в следующих версиях.</p>
+      </Sheet>
+    </div>
+  );
+}
+
+function PrefRow({ icon, label, hint, checked, onChange }: { icon: ReactNode; label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3.5">
+      <span className="text-ink-soft">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[15px] text-ink">{label}</div>
+        <div className="text-[12px] leading-snug text-ink-muted">{hint}</div>
+      </div>
+      <Toggle checked={checked} onChange={onChange} label={label} />
+    </div>
+  );
+}
