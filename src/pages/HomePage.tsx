@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart3, BookOpen, CalendarDays, ChevronRight, Droplet, NotebookPen, Settings, Sparkles } from 'lucide-react';
 import { t } from '@/i18n';
@@ -8,6 +8,7 @@ import { articleForPhase, getArticle } from '@/content/articles';
 import { daysWord, fmtRange } from '@/utils/date';
 import { Avatar, FlowerArt, LotusIcon, MoonPhase } from '@/components/art';
 import { useCountUp } from '@/utils/motion';
+import { currentStreak } from '@/features/streak/streak';
 import type { Phase } from '@/types';
 import { Button, Card, EmptyState, ProgressRing, SectionTitle } from '@/components/ui';
 import { MarkPeriodSheet } from '@/components/MarkPeriodSheet';
@@ -16,7 +17,9 @@ import { haptic, sound } from '@/utils/feedback';
 export function HomePage() {
   const nav = useNavigate();
   const { prediction: p, today, periodDays, profile } = useCycle();
-  const hasLogToday = useLunaStore((s) => !!s.logs[today]);
+  const logs = useLunaStore((s) => s.logs);
+  const hasLogToday = !!logs[today];
+  const streak = useMemo(() => currentStreak(logs, today), [logs, today]);
   const setPeriodDay = useLunaStore((s) => s.setPeriodDay);
   const [markOpen, setMarkOpen] = useState(false);
 
@@ -121,6 +124,12 @@ export function HomePage() {
             <NotebookPen size={18} />
             {hasLogToday ? t.home.checkedIn : t.home.checkIn}
           </Button>
+          {streak.days >= 2 && (
+            <div className="mt-2.5 flex animate-fadeIn items-center justify-center gap-1.5 text-[12.5px] text-ink-muted">
+              <MoonPhase progress={0.5} size={14} />
+              {(streak.includesToday ? t.streak.today : t.streak.pending)(daysWord(streak.days))}
+            </div>
+          )}
         </>
       )}
 

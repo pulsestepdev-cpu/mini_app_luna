@@ -50,3 +50,7 @@ No linter is configured; `tsc` with `strict`, `noUnusedLocals`, `noUnusedParamet
 ## Git workflow
 
 Repo: https://github.com/pulsestepdev-cpu/mini_app_luna (branch `main`). The owner has given standing permission: **commit and push to `main` yourself, without asking**, after each finished piece of work. Before committing, run `npm run typecheck` and `npm test` (and `npm run build` for larger changes); don't push a broken build. Write commit messages in English, short imperative subject + a body listing the notable changes. Never commit secrets (`.env*` is ignored) or build output.
+
+## Tools & autonomy
+
+The owner has given broad standing permission: use anything that helps — web search/fetch, installing npm/pip packages, CLI tools and programs on this PC, headless Chrome (playwright-core from the scratchpad) for visual checks, generating assets. Prefer doing things yourself over asking. If something is genuinely missing (an account, API key/bot token, paid service, a program that needs a GUI install or registration), tell the owner exactly what to install/register and why — they will do it.

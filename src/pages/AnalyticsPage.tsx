@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarRange, ChevronRight, Droplet, Hourglass, Repeat, Sparkles } from 'lucide-react';
+import { CalendarRange, ChevronRight, Droplet, FileText, Hourglass, Repeat, Sparkles } from 'lucide-react';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { computeAnalytics, type RangeKey } from '@/features/analytics/stats';
@@ -36,6 +36,18 @@ export function AnalyticsPage() {
           <div className="flex-1">
             <div className="text-[15px] font-semibold">{tA.insights}</div>
             <div className="text-[12.5px] text-ink-muted">{tA.insightsSub}</div>
+          </div>
+          <ChevronRight size={18} className="text-ink-faint" />
+        </Card>
+
+        {/* Отчёт для врача */}
+        <Card className="mt-3 flex items-center gap-3" onClick={() => nav('/report')}>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-plum-100 text-plum-600">
+            <FileText size={20} />
+          </span>
+          <div className="flex-1">
+            <div className="text-[15px] font-semibold">{t.report.title}</div>
+            <div className="text-[12.5px] text-ink-muted">PDF для приёма у гинеколога</div>
           </div>
           <ChevronRight size={18} className="text-ink-faint" />
         </Card>

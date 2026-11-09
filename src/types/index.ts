@@ -46,7 +46,11 @@ export interface NotificationSettings {
 export interface Preferences {
   haptics: boolean;
   sounds: boolean;
+  /** auto — как в Telegram / системе */
+  theme: ThemePref;
 }
+
+export type ThemePref = 'auto' | 'light' | 'dark';
 
 export type Phase = 'menstrual' | 'follicular' | 'ovulatory' | 'luteal';
 export type Confidence = 'low' | 'medium' | 'high';

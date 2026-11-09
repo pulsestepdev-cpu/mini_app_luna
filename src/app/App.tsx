@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { HashRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { startAutoBackup } from '@/features/backup/autoBackup';
 import { useLunaStore } from '@/store/useLunaStore';
 import { AppLayout } from './AppLayout';
 import { WelcomePage } from '@/pages/WelcomePage';
@@ -16,6 +18,7 @@ import { MyDataPage } from '@/pages/MyDataPage';
 import { NotificationsPage } from '@/pages/NotificationsPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { AboutPage } from '@/pages/AboutPage';
+import { ReportPage } from '@/pages/ReportPage';
 
 function RequireOnboarding() {
   const onboarded = useLunaStore((s) => s.profile.onboarded);
@@ -23,6 +26,7 @@ function RequireOnboarding() {
 }
 
 export function App() {
+  useEffect(() => startAutoBackup(), []);
   return (
     <HashRouter>
       <Routes>
@@ -44,6 +48,7 @@ export function App() {
             <Route path="/profile/notifications" element={<NotificationsPage />} />
             <Route path="/profile/privacy" element={<PrivacyPage />} />
             <Route path="/profile/about" element={<AboutPage />} />
+            <Route path="/report" element={<ReportPage />} />
           </Route>
           <Route path="/success" element={<SuccessPage />} />
         </Route>

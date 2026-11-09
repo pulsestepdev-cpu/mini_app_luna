@@ -19,6 +19,7 @@ interface TelegramWebApp {
     selectionChanged(): void;
   };
   showConfirm?(message: string, cb: (ok: boolean) => void): void;
+  CloudStorage?: import('@/features/backup/cloud').CloudStorageApi;
   BackButton?: {
     show(): void;
     hide(): void;

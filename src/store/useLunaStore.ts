@@ -20,6 +20,16 @@ interface OnboardingInput {
 
 export type LogInput = Omit<DailyLog, 'timezone' | 'createdAt' | 'updatedAt'>;
 
+/** Все данные пользователя — для резервной копии и экспорта */
+export interface Snapshot {
+  v: 1;
+  profile: Profile;
+  periodDays: Record<DateKey, Flow>;
+  logs: Record<DateKey, DailyLog>;
+  notifications: NotificationSettings;
+  prefs: Preferences;
+}
+
 interface LunaState {
   profile: Profile;
   periodDays: Record<DateKey, Flow>;
@@ -35,6 +45,7 @@ interface LunaState {
   updateNotifications: (patch: Partial<NotificationSettings>) => void;
   updatePrefs: (patch: Partial<Preferences>) => void;
   resetAll: () => void;
+  importSnapshot: (snap: Snapshot) => void;
   seedDemo: () => void;
 }
 
@@ -55,7 +66,7 @@ const initialNotifications: NotificationSettings = {
   time: '09:00',
 };
 
-const initialPrefs: Preferences = { haptics: true, sounds: true };
+const initialPrefs: Preferences = { haptics: true, sounds: true, theme: 'auto' };
 
 const isEmptyLog = (l: LogInput) =>
   !l.mood && !l.energy && !l.pain && !l.appetite && l.sleepHours == null && !l.sleepQuality &&
@@ -132,6 +143,15 @@ export const useLunaStore = create<LunaState>()(
       resetAll: () =>
         set({ profile: initialProfile(), periodDays: {}, logs: {}, notifications: initialNotifications, prefs: initialPrefs }),
 
+      importSnapshot: (snap) =>
+        set({
+          profile: { ...initialProfile(), ...snap.profile },
+          periodDays: snap.periodDays ?? {},
+          logs: snap.logs ?? {},
+          notifications: { ...initialNotifications, ...snap.notifications },
+          prefs: { ...initialPrefs, ...snap.prefs },
+        }),
+
       seedDemo: () => set(buildDemo(get().profile.name || 'Анна')),
     }),
     {
@@ -190,4 +210,9 @@ function buildDemo(name: string): Pick<LunaState, 'profile' | 'periodDays' | 'lo
     periodDays,
     logs,
   };
+}
+
+export function getSnapshot(): Snapshot {
+  const { profile, periodDays, logs, notifications, prefs } = useLunaStore.getState();
+  return { v: 1, profile, periodDays, logs, notifications, prefs };
 }

@@ -1,13 +1,37 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { StarField } from '@/components/art';
-import { Button } from '@/components/ui';
+import { Button, Sheet } from '@/components/ui';
+import { cloudStorage } from '@/features/backup/autoBackup';
+import { loadBackup } from '@/features/backup/cloud';
+import type { Snapshot } from '@/store/useLunaStore';
+import { fmt, plural } from '@/utils/date';
+import { haptic } from '@/utils/feedback';
 
 export function WelcomePage() {
   const nav = useNavigate();
   const onboarded = useLunaStore((s) => s.profile.onboarded);
+  const importSnapshot = useLunaStore((s) => s.importSnapshot);
+  const [found, setFound] = useState<{ snapshot: Snapshot; when: string; logs: number } | null>(null);
+
+  // Новая установка в Telegram: если в облаке есть копия — предложить вернуть
+  useEffect(() => {
+    const cs = cloudStorage();
+    if (!cs || onboarded) return;
+    loadBackup(cs)
+      .then((b) => b?.snapshot.profile.onboarded && setFound({ snapshot: b.snapshot, when: fmt(b.meta.savedAt.slice(0, 10), 'd MMMM'), logs: b.meta.logs }))
+      .catch(() => undefined);
+  }, [onboarded]);
+
+  const restore = () => {
+    if (!found) return;
+    importSnapshot(found.snapshot);
+    haptic.success();
+    nav('/', { replace: true });
+  };
 
   return (
     <div className="relative mx-auto flex min-h-full max-w-[440px] flex-col overflow-hidden bg-plum-900 text-white">
@@ -43,6 +67,21 @@ export function WelcomePage() {
           </span>
         </div>
       </div>
+      <Sheet open={!!found} onClose={() => setFound(null)} title={t.backup.foundTitle}>
+        {found && (
+          <>
+            <p className="text-[15px] leading-relaxed text-ink-soft">
+              {t.backup.foundText(found.when, `${found.logs} ${plural(found.logs, ['запись', 'записи', 'записей'])} о самочувствии`)}
+            </p>
+            <Button className="mt-5" onClick={restore}>
+              {t.backup.restoreYes}
+            </Button>
+            <Button variant="ghost" className="mt-2.5" onClick={() => setFound(null)}>
+              {t.backup.restoreNo}
+            </Button>
+          </>
+        )}
+      </Sheet>
     </div>
   );
 }
