@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LUNA — menstrual cycle & wellness tracker, built as a Telegram Mini App for one user (the owner's wife). The full product spec (originally "LUNA Master Technical Specification v1.0") targets React + FastAPI + PostgreSQL + Telegram bot; the owner explicitly dropped the **AI assistant** and requires the UI to **visually match the reference mockup** (lavender/plum glassmorphism, 10 phone screens). The AI tab from the mockup was replaced by **Статьи** (articles); insights live under Аналитика.
 
-Current stage: **frontend-only "constructor"** — Russian only, no backend, no bot. Telegram SDK is loaded in `index.html` and `src/app/telegram.ts` only does UI setup inside Telegram (expand, header/background colors, `disableVerticalSwipes`); it is a no-op in a plain browser and there is no initData auth yet. Analytics charts are bar charts (`components/LengthBars.tsx`) at the owner's request, not line charts. Planned next: real illustrations, FastAPI backend + Telegram initData auth, aiogram bot for reminders, deploy.
+Current stage: **live** — deployed on the owner's CapRover as one app (site + API + bot @luna_tracker_bot + reminders). Russian only. The app is **local-first**: localStorage is the source of truth, Telegram CloudStorage holds a backup, and the server only receives a copy for reminders/partner hints. Telegram SDK is loaded in `index.html`; `src/app/telegram.ts` does UI setup inside Telegram and is a no-op in a plain browser. Analytics charts are bar charts (`components/LengthBars.tsx`) at the owner's request, not line charts.
 
 The user communicates in Russian; UI text is Russian.
 
@@ -19,13 +19,22 @@ npx vitest run src/features/cycle/engine.test.ts   # single file
 npx vitest run -t "задержка"                         # single test by name
 npm run typecheck           # tsc --noEmit
 npm run build               # tsc -b && vite build → dist/
+
+# server (Python 3.12, venv in server/.venv — create: python -m venv server/.venv && server/.venv/Scripts/pip install -r server/requirements-dev.txt)
+cd server && .venv/Scripts/python -m pytest -q          # server tests (never touch the real bot)
+# local run WITHOUT the real bot (otherwise it polls with the token from .env and competes with production):
+LUNA_NO_DOTENV=1 DATA_DIR=/tmp/luna STATIC_DIR=../dist .venv/Scripts/python -m uvicorn app.main:app --port 8077
 ```
+
+In PowerShell `$env:X=''` *deletes* the variable — use `LUNA_NO_DOTENV=1`, not an empty `BOT_TOKEN`, to keep the bot off locally.
 
 No linter is configured; `tsc` with `strict`, `noUnusedLocals`, `noUnusedParameters` is the check. Path alias `@/` → `src/`.
 
 ## Architecture
 
-**Data layer is a deliberate temporary seam.** `src/store/useLunaStore.ts` (Zustand + `persist` to localStorage, key `luna-store-v1`) is the *only* place data is read/written. Screens call its actions (`setPeriodDay`, `saveLog`, `completeOnboarding`, …), never localStorage directly — so swapping to the backend later touches only this file. `seedDemo()` builds demo history (dev-only button in Profile, gated by `import.meta.env.DEV`).
+**Data layer.** `src/store/useLunaStore.ts` (Zustand + `persist` to localStorage, key `luna-store-v1`) is the *only* place data is read/written. Screens call its actions (`setPeriodDay`, `saveLog`, `completeOnboarding`, …), never localStorage directly. Side channels subscribe to the store: `features/backup/autoBackup.ts` (Telegram CloudStorage) and `features/sync/server.ts` (POST `/api/sync`), both debounced and only inside Telegram. `seedDemo()` builds demo history (dev-only button in Profile, gated by `import.meta.env.DEV`).
+
+**Server (`server/app`)** — FastAPI + aiogram 3 in one process, SQLite at `$DATA_DIR/luna.db` (`/data`, a CapRover persistent directory). It serves `dist/` as static files too. Auth = Telegram `initData` HMAC (`auth.py`, header `Authorization: tma <initData>`). Access: `ADMIN_ID` and `ALLOWED_USER_IDS` env, plus users the admin approves via inline buttons the bot sends on first contact. **The client computes the reminder plan** (`src/features/sync/plan.ts`, same engine as the calendar) and the server only schedules by those dates in the user's timezone (`reminders.py` is pure and unit-tested; `main.py` ticks every minute, `sent` table dedupes per kind/day). Partner mode: one-time invite link `t.me/<bot>?start=p_<token>`, partner gets only gentle hints (period soon / PMS / period started), `/stop` to leave. Env: `BOT_TOKEN`, `ADMIN_ID`, `ALLOWED_USER_IDS`, `WEBAPP_URL`, `DATA_DIR`, `STATIC_DIR`; locally read from the git-ignored `.env`.
 
 **Period data model:** periods are not stored as ranges. `periodDays: Record<DateKey, Flow>` holds individually marked days; `getPeriods()` in the engine groups them into periods (consecutive days, a 1-day gap allowed). Daily wellbeing is `logs: Record<DateKey, DailyLog>` (one log per local day). All dates are local `YYYY-MM-DD` strings (`DateKey`) handled via `src/utils/date.ts` — use its helpers (`addDaysKey`, `diffDays`, `todayKey`, `fmt*`, `plural`/`daysWord` for Russian plurals) rather than raw `Date` math.
 
@@ -53,7 +62,7 @@ No linter is configured; `tsc` with `strict`, `noUnusedLocals`, `noUnusedParamet
 
 ## Deploy
 
-Frontend is deployed to the owner's VPS running **CapRover**: `captain-definition` → `Dockerfile` (npm ci → `npm test` → build → nginx with `deploy/nginx.conf`; `index.html` is no-cache, hashed `/assets` immutable). CapRover pulls `main` via a GitHub webhook, so every push to `main` redeploys — failing tests block the deploy. Step-by-step setup (BotFather, CapRover, Mini App linking) is in `docs/telegram/README.md`. Planned: backend + bot as a second CapRover app.
+One CapRover app `luna-mini-app` (created with persistent data) at https://luna-mini-app.2.28.66.82.nip.io: `captain-definition` → `Dockerfile` (node stage: npm ci → `npm test` → build; python stage: pip → `pytest` → uvicorn on :80 serving `dist` + API + bot). Cache headers are set in `main.py` (`index.html` no-cache, `/assets` immutable, `/api` no-store). CapRover pulls `main` via a GitHub webhook, so every push to `main` redeploys — any failing test (JS or Python) blocks the deploy. Only one bot instance may poll at a time: never run the server locally with the real token while production is up. Setup steps (BotFather, CapRover env vars, persistent dir `/data`, Mini App linking) are in `docs/telegram/README.md`.
 
 ## Git workflow
 

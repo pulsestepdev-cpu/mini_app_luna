@@ -5,3 +5,7 @@ art/source
 *.local
 .env
 .env.*
+server/.venv
+server/data
+**/__pycache__
+**/.pytest_cache

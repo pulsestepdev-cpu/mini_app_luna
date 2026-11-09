@@ -23,6 +23,8 @@ interface TelegramWebApp {
     selectionChanged(): void;
   };
   showConfirm?(message: string, cb: (ok: boolean) => void): void;
+  requestWriteAccess?(cb?: (granted: boolean) => void): void;
+  openTelegramLink?(url: string): void;
   CloudStorage?: import('@/features/backup/cloud').CloudStorageApi;
   BackButton?: {
     show(): void;

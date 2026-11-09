@@ -9,6 +9,7 @@ import { fmt, todayKey } from '@/utils/date';
 import { deliverFile } from '@/utils/share';
 import { backupNow, cloudStorage, useBackupStatus } from '@/features/backup/autoBackup';
 import { loadBackup, removeBackup } from '@/features/backup/cloud';
+import { deleteServerData, serverAvailable } from '@/features/sync/server';
 import { ListRow, PageHeader, Toast } from '@/components/ui';
 
 export function PrivacyPage() {
@@ -53,6 +54,7 @@ export function PrivacyPage() {
     if (!(await confirmDialog(t.privacy.confirmDelete))) return;
     const cs = cloudStorage();
     if (cs) await removeBackup(cs).catch(() => undefined);
+    if (serverAvailable()) await deleteServerData().catch(() => undefined);
     resetAll();
     nav('/welcome', { replace: true });
   };
