@@ -9,6 +9,7 @@ import { daysWord, fmtRange } from '@/utils/date';
 import { Avatar, FlowerArt, Illustration, MoonPhase } from '@/components/art';
 import { useCountUp } from '@/utils/motion';
 import { currentStreak } from '@/features/streak/streak';
+import { useAvatarSrc } from '@/features/profile/avatar';
 import type { Phase } from '@/types';
 import { Button, Card, EmptyState, ProgressRing, SectionTitle } from '@/components/ui';
 import { MarkPeriodSheet } from '@/components/MarkPeriodSheet';
@@ -22,6 +23,7 @@ export function HomePage() {
   const streak = useMemo(() => currentStreak(logs, today), [logs, today]);
   const setPeriodDay = useLunaStore((s) => s.setPeriodDay);
   const [markOpen, setMarkOpen] = useState(false);
+  const avatarSrc = useAvatarSrc();
 
   // При задержке вместо статьи по фазе — спокойный план действий
   const article = (p?.isLate && getArticle('late-period')) || articleForPhase(p?.phase ?? 'follicular');
@@ -32,7 +34,7 @@ export function HomePage() {
     <div className="px-5">
       {/* Приветствие */}
       <header className="flex items-center gap-3 pb-4 pt-[calc(env(safe-area-inset-top)+20px)]">
-        <Avatar name={profile.name} size={48} />
+        <Avatar name={profile.name} size={48} src={avatarSrc} />
         <div className="flex-1 leading-tight">
           <div className="text-[17px] font-semibold">
             {greeting()}

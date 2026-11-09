@@ -7,6 +7,7 @@ interface TelegramWebApp {
   initData: string;
   platform: string;
   colorScheme?: 'light' | 'dark';
+  initDataUnsafe?: { user?: { id: number; first_name?: string; last_name?: string; username?: string; photo_url?: string } };
   onEvent?(event: string, cb: () => void): void;
   offEvent?(event: string, cb: () => void): void;
   ready(): void;

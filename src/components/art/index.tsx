@@ -2,7 +2,7 @@
  * ЗАГЛУШКИ иллюстраций на SVG. Позже заменяются на сгенерированные
  * картинки (public/art/*.png) — достаточно поменять содержимое компонентов.
  */
-import { useId, useMemo, type CSSProperties } from 'react';
+import { useId, useMemo, useState, type CSSProperties } from 'react';
 import { cn } from '@/utils/cn';
 
 /** Контурная иконка лотоса — для кольца прогресса */
@@ -66,9 +66,21 @@ export function StarField({ count = 18, className }: { count?: number; className
   );
 }
 
-/** Аватар: заглушка с первой буквой имени */
-export function Avatar({ name, size = 44 }: { name: string; size?: number }) {
+/** Аватар: фото (своё или из Telegram), а если его нет или не загрузилось — первая буква имени */
+export function Avatar({ name, size = 44, src }: { name: string; size?: number; src?: string | null }) {
   const letter = (name.trim()[0] ?? '♡').toUpperCase();
+  const [broken, setBroken] = useState<string | null>(null);
+  if (src && broken !== src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        onError={() => setBroken(src)}
+        className="shrink-0 rounded-full object-cover shadow-soft ring-2 ring-surface"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   return (
     <div
       className="flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-200 via-plum-200 to-plum-400 font-serif font-semibold text-white shadow-soft ring-2 ring-surface"

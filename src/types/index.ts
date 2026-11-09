@@ -32,6 +32,10 @@ export interface Profile {
   regularity: Regularity | null;
   onboarded: boolean;
   createdAt: string;
+  /** Своё фото (data URL, 256×256 JPEG). null/нет — не выбрано */
+  photo?: string | null;
+  /** Показывать фото из профиля Telegram, если своего нет (по умолчанию да) */
+  useTelegramPhoto?: boolean;
 }
 
 export interface NotificationSettings {

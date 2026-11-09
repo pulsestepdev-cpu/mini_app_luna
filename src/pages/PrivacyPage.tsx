@@ -94,7 +94,8 @@ export function PrivacyPage() {
         <h2 className="h-section mb-2.5 mt-5 px-1">{t.privacy.files}</h2>
         <div className="glass divide-y divide-plum-100/70 p-0">
           <ListRow icon={<FileText size={20} />} label={t.report.open} onClick={() => nav('/report')} />
-          <ListRow icon={<Download size={20} />} label={t.privacy.export} onClick={exportData} />
+          {/* Выгрузка JSON — только для разработки, обычному пользователю не нужна */}
+          {import.meta.env.DEV && <ListRow icon={<Download size={20} />} label={t.privacy.export} onClick={exportData} />}
         </div>
 
         <div className="glass mt-5 p-0">

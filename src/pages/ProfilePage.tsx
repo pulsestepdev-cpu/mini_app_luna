@@ -1,11 +1,13 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, FlaskConical, Globe, Info, Lock, MoonStar, UserRound, Vibrate, Volume2 } from 'lucide-react';
+import { Bell, Camera, Check, FlaskConical, Globe, ImageUp, Info, Lock, MoonStar, Send, UserRound, Vibrate, Volume2 } from 'lucide-react';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { fmt } from '@/utils/date';
 import { Avatar } from '@/components/art';
-import { Button, ListRow, Segmented, Sheet, Toggle } from '@/components/ui';
+import { Button, ListRow, Segmented, Sheet, Toast, Toggle } from '@/components/ui';
+import { fileToAvatar, telegramPhotoUrl, useAvatarSrc } from '@/features/profile/avatar';
+import { cn } from '@/utils/cn';
 import type { ThemePref } from '@/types';
 import { haptic, sound } from '@/utils/feedback';
 
@@ -14,13 +16,37 @@ export function ProfilePage() {
   const profile = useLunaStore((s) => s.profile);
   const seedDemo = useLunaStore((s) => s.seedDemo);
   const [langOpen, setLangOpen] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const avatarSrc = useAvatarSrc();
+  const updateProfile = useLunaStore((s) => s.updateProfile);
+  const tgPhoto = telegramPhotoUrl();
+  const photoMode = profile.photo ? 'custom' : (profile.useTelegramPhoto ?? true) && tgPhoto ? 'telegram' : 'none';
+
+  const onFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      updateProfile({ photo: await fileToAvatar(file) });
+      haptic.success();
+      setPhotoOpen(false);
+    } catch {
+      setToast(t.profile.photoError);
+      setTimeout(() => setToast(null), 2200);
+    }
+  };
   const prefs = useLunaStore((s) => s.prefs);
   const updatePrefs = useLunaStore((s) => s.updatePrefs);
 
   return (
     <div className="px-5 pt-[calc(env(safe-area-inset-top)+28px)]">
       <div className="flex flex-col items-center text-center">
-        <Avatar name={profile.name} size={96} />
+        <button onClick={() => { haptic.tap(); setPhotoOpen(true); }} className="tap relative" aria-label={t.profile.photoChange}>
+          <Avatar name={profile.name} size={96} src={avatarSrc} />
+          <span className="absolute bottom-0.5 right-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-white shadow-soft ring-2 ring-surface">
+            <Camera size={15} />
+          </span>
+        </button>
         <div className="mt-3 text-[20px] font-bold">{profile.name || 'LUNA'} ♡</div>
         <div className="text-[13px] text-ink-muted">{t.profile.since} {fmt(profile.createdAt.slice(0, 10), 'MMMM yyyy')}</div>
       </div>
@@ -80,6 +106,30 @@ export function ProfilePage() {
         </div>
       )}
 
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ''; }} />
+      <Sheet open={photoOpen} onClose={() => setPhotoOpen(false)} title={t.profile.photo}>
+        <div className="glass-strong divide-y divide-plum-100/70 overflow-hidden p-0">
+          <PhotoOption icon={<ImageUp size={20} />} label={t.profile.photoPick} active={photoMode === 'custom'} onClick={() => fileRef.current?.click()} />
+          {tgPhoto && (
+            <PhotoOption
+              icon={<Send size={20} />}
+              label={t.profile.photoTelegram}
+              hint={t.profile.photoTelegramHint}
+              active={photoMode === 'telegram'}
+              onClick={() => { updateProfile({ photo: null, useTelegramPhoto: true }); haptic.select(); setPhotoOpen(false); }}
+            />
+          )}
+          <PhotoOption
+            icon={<UserRound size={20} />}
+            label={t.profile.photoNone}
+            hint={t.profile.photoNoneHint}
+            active={photoMode === 'none'}
+            onClick={() => { updateProfile({ photo: null, useTelegramPhoto: false }); haptic.select(); setPhotoOpen(false); }}
+          />
+        </div>
+      </Sheet>
+      <Toast text={toast} />
+
       <Sheet open={langOpen} onClose={() => setLangOpen(false)} title={t.profile.language}>
         <div className="glass-strong flex items-center justify-between px-4 py-3.5">
           <span className="text-[15px]">🇷🇺 Русский</span>
@@ -101,5 +151,18 @@ function PrefRow({ icon, label, hint, checked, onChange }: { icon: ReactNode; la
       </div>
       <Toggle checked={checked} onChange={onChange} label={label} />
     </div>
+  );
+}
+
+function PhotoOption({ icon, label, hint, active, onClick }: { icon: ReactNode; label: string; hint?: string; active: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="tap flex w-full items-center gap-3 px-4 py-3.5 text-left">
+      <span className={cn('text-ink-soft', active && 'text-plum-600')}>{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] text-ink">{label}</span>
+        {hint && <span className="block text-[12px] text-ink-muted">{hint}</span>}
+      </span>
+      {active && <Check size={20} className="text-plum-600" />}
+    </button>
   );
 }

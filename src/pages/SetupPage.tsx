@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '@/i18n';
 import { Illustration } from '@/components/art';
+import { telegramFirstName } from '@/features/profile/avatar';
 import { useLunaStore } from '@/store/useLunaStore';
 import { todayKey } from '@/utils/date';
 import { Button, Chip, PageHeader } from '@/components/ui';
@@ -10,7 +11,8 @@ import { CycleFields, type CycleFieldsValue } from '@/components/CycleFields';
 export function SetupPage() {
   const nav = useNavigate();
   const complete = useLunaStore((s) => s.completeOnboarding);
-  const [name, setName] = useState('');
+  // Имя из Telegram подставляем сразу — его можно поменять
+  const [name, setName] = useState(telegramFirstName);
   const [lastPeriod, setLastPeriod] = useState<string>('');
   const [unknownDate, setUnknownDate] = useState(false);
   const [cycle, setCycle] = useState<CycleFieldsValue>({ cycleLength: 28, periodLength: 5, regularity: null });
