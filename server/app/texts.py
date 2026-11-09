@@ -120,5 +120,13 @@ def access_request(name: str, user_id: int, username: str | None) -> str:
     return f"🔔 {who} хочет пользоваться LUNA.\nID: {user_id}"
 
 
+def access_closed() -> str:
+    return "Доступ к этой LUNA закрыт."
+
+
+def users_title() -> str:
+    return "Кто заходил в LUNA. Нажми, чтобы закрыть или открыть доступ:"
+
+
 def access_granted() -> str:
     return "Доступ открыт ♡ Открой LUNA — напоминания и подсказки теперь работают."

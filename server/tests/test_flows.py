@@ -19,11 +19,15 @@ class FakeLuna:
 
     def __init__(self, allowed: set[int]):
         self.allowed = allowed
+        self.denied: set[int] = set()
         self.sent: list[tuple[int, str]] = []
         self.requests: list[int] = []
 
     def is_allowed(self, uid: int) -> bool:
-        return uid in self.allowed
+        return uid in self.allowed and uid not in self.denied
+
+    def is_denied(self, uid: int) -> bool:
+        return uid in self.denied
 
     async def request_access(self, uid, name, username):
         self.requests.append(uid)
@@ -57,10 +61,20 @@ def plan(last_start: str) -> dict:
 
 def test_stranger_is_not_synced_and_owner_is_asked(client):
     c, fake = client
+    me = c.get("/api/me", headers=auth(STRANGER, "Незнакомка")).json()
+    assert (me["allowed"], me["pending"], me["denied"]) == (False, True, False)
+    assert fake.requests == [STRANGER]  # открыл приложение — владелец получил запрос
     r = c.post("/api/sync", json={"snapshot": {}, "plan": plan("2026-11-01")}, headers=auth(STRANGER, "Незнакомка"))
     assert r.status_code == 403
-    assert fake.requests == [STRANGER]
-    assert c.get("/api/me", headers=auth(STRANGER)).json()["allowed"] is False
+
+
+def test_denied_user_is_locked_out(client):
+    c, fake = client
+    fake.denied.add(STRANGER)
+    me = c.get("/api/me", headers=auth(STRANGER)).json()
+    assert (me["allowed"], me["pending"], me["denied"]) == (False, False, True)
+    assert fake.requests == []  # заблокированного повторно не предлагаем
+    assert c.post("/api/sync", json={"snapshot": {}, "plan": plan("2026-11-01")}, headers=auth(STRANGER)).status_code == 403
 
 
 def test_owner_sync_partner_invite_and_period_hint(client):

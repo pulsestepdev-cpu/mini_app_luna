@@ -11,6 +11,7 @@ import { buildPlan, serverSnapshot } from './plan';
 
 export interface ServerMe {
   allowed: boolean;
+  denied: boolean;
   pending: boolean;
   started: boolean;
   bot: string | null;

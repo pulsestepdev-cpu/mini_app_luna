@@ -148,12 +148,18 @@ def health() -> dict:
 
 
 @app.get("/api/me")
-def me(user: TgUser = Depends(current_user)) -> dict:
+async def me(user: TgUser = Depends(current_user)) -> dict:
+    is_allowed = allowed(user.id)
+    denied = bool(luna and luna.is_denied(user.id))
+    # Первое открытие приложения незнакомым аккаунтом — владелец получает запрос с кнопками
+    if luna and not is_allowed and not denied:
+        await luna.request_access(user.id, user.first_name, user.username)
     row = db.user(user.id)
     partner = db.partner(user.id)
     return {
-        "allowed": allowed(user.id),
-        "pending": bool(row and row["requested"]) and not allowed(user.id),
+        "allowed": is_allowed,
+        "denied": denied,
+        "pending": not is_allowed and not denied,
         "started": bool(row and row["started"]),
         "bot": luna.username if luna else None,
         "partner": {

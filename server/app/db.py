@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
   first_name TEXT NOT NULL DEFAULT '',
   approved INTEGER NOT NULL DEFAULT 0,      -- одобрен владельцем через бота
   requested INTEGER NOT NULL DEFAULT 0,     -- запрос на доступ уже отправлен админу
+  denied INTEGER NOT NULL DEFAULT 0,        -- владелец закрыл доступ
   started INTEGER NOT NULL DEFAULT 0,       -- писал боту / разрешил сообщения
   snapshot TEXT,                            -- данные приложения (JSON)
   plan TEXT,                                -- расписание напоминаний, посчитанное приложением (JSON)
@@ -47,6 +48,10 @@ class Db:
         with self._lock:
             self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.executescript(SCHEMA)
+            # Миграции для баз, созданных раньше
+            cols = {r[1] for r in self._conn.execute("PRAGMA table_info(users)")}
+            if "denied" not in cols:
+                self._conn.execute("ALTER TABLE users ADD COLUMN denied INTEGER NOT NULL DEFAULT 0")
             self._conn.commit()
 
     def _exec(self, sql: str, args: tuple = ()) -> sqlite3.Cursor:
@@ -75,7 +80,7 @@ class Db:
         return self._one("SELECT * FROM users WHERE tg_id = ?", (tg_id,))
 
     def set_flag(self, tg_id: int, flag: str, value: bool = True) -> None:
-        assert flag in {"approved", "requested", "started"}
+        assert flag in {"approved", "requested", "started", "denied"}
         self.ensure_user(tg_id)
         self._exec(f"UPDATE users SET {flag} = ? WHERE tg_id = ?", (int(value), tg_id))
 
@@ -88,6 +93,13 @@ class Db:
             (json.dumps(snapshot, ensure_ascii=False), json.dumps(plan, ensure_ascii=False), time.time(), tg_id),
         )
         return prev
+
+    def set_access(self, tg_id: int, allowed: bool) -> None:
+        self.ensure_user(tg_id)
+        self._exec("UPDATE users SET approved = ?, denied = ?, requested = 1 WHERE tg_id = ?", (int(allowed), int(not allowed), tg_id))
+
+    def all_users(self) -> list[sqlite3.Row]:
+        return self._all("SELECT * FROM users ORDER BY updated_at DESC, tg_id")
 
     def users_with_plan(self) -> list[sqlite3.Row]:
         return self._all("SELECT * FROM users WHERE plan IS NOT NULL")

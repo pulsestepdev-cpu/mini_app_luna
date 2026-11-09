@@ -3,6 +3,7 @@ import { HashRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { startAutoBackup } from '@/features/backup/autoBackup';
 import { startAutoSync } from '@/features/sync/server';
 import { useThemeSync } from './theme';
+import { AccessGate } from './AccessGate';
 import { useLunaStore } from '@/store/useLunaStore';
 import { AppLayout } from './AppLayout';
 import { WelcomePage } from '@/pages/WelcomePage';
@@ -32,32 +33,34 @@ export function App() {
   useEffect(() => startAutoSync(), []);
   useThemeSync();
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/welcome" element={<WelcomePage />} />
-        <Route path="/setup" element={<SetupPage />} />
-        <Route element={<RequireOnboarding />}>
-          <Route element={<AppLayout tabs />}>
-            <Route index element={<HomePage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/insights" element={<InsightsPage />} />
-            <Route path="/articles" element={<ArticlesPage />} />
-            <Route path="/articles/:slug" element={<ArticlePage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+    <AccessGate>
+      <HashRouter>
+        <Routes>
+          <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/setup" element={<SetupPage />} />
+          <Route element={<RequireOnboarding />}>
+            <Route element={<AppLayout tabs />}>
+              <Route index element={<HomePage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/insights" element={<InsightsPage />} />
+              <Route path="/articles" element={<ArticlesPage />} />
+              <Route path="/articles/:slug" element={<ArticlePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+            <Route element={<AppLayout />}>
+              <Route path="/checkin" element={<CheckInPage />} />
+              <Route path="/profile/data" element={<MyDataPage />} />
+              <Route path="/profile/notifications" element={<NotificationsPage />} />
+              <Route path="/profile/privacy" element={<PrivacyPage />} />
+              <Route path="/profile/about" element={<AboutPage />} />
+              <Route path="/report" element={<ReportPage />} />
+            </Route>
+            <Route path="/success" element={<SuccessPage />} />
           </Route>
-          <Route element={<AppLayout />}>
-            <Route path="/checkin" element={<CheckInPage />} />
-            <Route path="/profile/data" element={<MyDataPage />} />
-            <Route path="/profile/notifications" element={<NotificationsPage />} />
-            <Route path="/profile/privacy" element={<PrivacyPage />} />
-            <Route path="/profile/about" element={<AboutPage />} />
-            <Route path="/report" element={<ReportPage />} />
-          </Route>
-          <Route path="/success" element={<SuccessPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </HashRouter>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </HashRouter>
+    </AccessGate>
   );
 }
