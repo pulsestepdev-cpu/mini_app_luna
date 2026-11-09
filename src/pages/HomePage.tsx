@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, BookOpen, CalendarDays, ChevronRight, Droplet, NotebookPen, Settings, Sparkles } from 'lucide-react';
+import { BarChart3, BookOpen, CalendarDays, ChevronRight, Droplet, NotebookPen, Settings, Smartphone, Sparkles, X } from 'lucide-react';
+import { useHomeScreen } from '@/features/profile/homeScreen';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { useCycle } from '@/features/cycle/useCycle';
@@ -24,6 +25,22 @@ export function HomePage() {
   const setPeriodDay = useLunaStore((s) => s.setPeriodDay);
   const [markOpen, setMarkOpen] = useState(false);
   const avatarSrc = useAvatarSrc();
+  const home = useHomeScreen();
+  const [tipHidden, setTipHidden] = useState(() => {
+    try {
+      return localStorage.getItem('luna-home-tip') === 'hidden';
+    } catch {
+      return false;
+    }
+  });
+  const hideTip = () => {
+    setTipHidden(true);
+    try {
+      localStorage.setItem('luna-home-tip', 'hidden');
+    } catch {
+      /* ничего страшного */
+    }
+  };
 
   // При задержке вместо статьи по фазе — спокойный план действий
   const article = (p?.isLate && getArticle('late-period')) || articleForPhase(p?.phase ?? 'follicular');
@@ -133,6 +150,22 @@ export function HomePage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Ярлык на экран телефона — подсказка один раз, если телефон это умеет */}
+      {p && home.status === 'missed' && !tipHidden && (
+        <div className="glass mt-4 flex animate-fadeIn items-center gap-3 p-3.5 pr-2">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-plum-100 text-plum-600">
+            <Smartphone size={19} />
+          </span>
+          <p className="min-w-0 flex-1 text-[13px] leading-snug text-ink-soft">{t.profile.homeScreenTip}</p>
+          <button onClick={() => { haptic.tap(); home.add(); }} className="tap shrink-0 rounded-full bg-brand-600 px-3.5 py-2 text-[13px] font-semibold text-white">
+            {t.profile.homeScreenAdd}
+          </button>
+          <button onClick={hideTip} className="tap shrink-0 rounded-full p-1.5 text-ink-faint" aria-label="Скрыть">
+            <X size={16} />
+          </button>
+        </div>
       )}
 
       {/* Быстрые действия */}

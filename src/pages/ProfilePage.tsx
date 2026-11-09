@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Camera, Check, FlaskConical, Globe, ImageUp, Info, Lock, MoonStar, Send, UserRound, Vibrate, Volume2 } from 'lucide-react';
+import { Bell, Camera, Check, FlaskConical, Globe, ImageUp, Info, Lock, MoonStar, Send, Smartphone, UserRound, Vibrate, Volume2 } from 'lucide-react';
+import { useHomeScreen } from '@/features/profile/homeScreen';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { fmt } from '@/utils/date';
@@ -20,6 +21,7 @@ export function ProfilePage() {
   const [toast, setToast] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const avatarSrc = useAvatarSrc();
+  const home = useHomeScreen();
   const updateProfile = useLunaStore((s) => s.updateProfile);
   const tgPhoto = telegramPhotoUrl();
   const photoMode = profile.photo ? 'custom' : (profile.useTelegramPhoto ?? true) && tgPhoto ? 'telegram' : 'none';
@@ -58,6 +60,24 @@ export function ProfilePage() {
         <ListRow icon={<Globe size={20} />} label={t.profile.language} value={t.profile.languageValue} onClick={() => setLangOpen(true)} />
         <ListRow icon={<Info size={20} />} label={t.profile.about} onClick={() => nav('/profile/about')} />
       </div>
+
+      {(home.available || home.status === 'added') && (
+        <div className="glass mt-4 p-0">
+          {home.status === 'added' ? (
+            <div className="flex items-center gap-3 px-4 py-3.5 text-[15px] text-ink-soft">
+              <Smartphone size={20} className="text-plum-600" /> {t.profile.homeScreenAdded}
+            </div>
+          ) : (
+            <button onClick={() => { haptic.tap(); home.add(); }} className="tap flex w-full items-center gap-3 px-4 py-3.5 text-left">
+              <Smartphone size={20} className="text-plum-600" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] text-ink">{t.profile.homeScreen}</span>
+                <span className="block text-[12px] text-ink-muted">{t.profile.homeScreenHint}</span>
+              </span>
+            </button>
+          )}
+        </div>
+      )}
 
       <h2 className="h-section mb-2.5 mt-6 px-1">{t.profile.feel}</h2>
       <div className="glass divide-y divide-plum-100/70 overflow-hidden p-0">
