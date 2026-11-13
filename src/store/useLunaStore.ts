@@ -74,6 +74,43 @@ const initialNotifications: NotificationSettings = {
 
 const initialPrefs: Preferences = { haptics: true, sounds: true, theme: 'auto' };
 
+/** Что хранится в localStorage (и в резервной копии) */
+export type PersistedData = Pick<LunaState, 'profile' | 'periodDays' | 'logs' | 'intimacy' | 'notifications' | 'prefs'>;
+
+/**
+ * Версия формата данных в localStorage. Если формат меняется несовместимо —
+ * увеличь её и добавь шаг в migrateData (например, `if (from < 2) …`).
+ * Новые необязательные поля версии не требуют: их достроит withDefaults.
+ */
+export const STORE_VERSION = 1;
+
+/**
+ * Достраивает сохранённые данные до текущего формата: недостающие разделы
+ * и новые поля внутри профиля/настроек получают значения по умолчанию.
+ * Используется и при запуске, и при восстановлении копии.
+ */
+export function withDefaults(saved: Partial<PersistedData> | null | undefined): PersistedData {
+  const s = saved ?? {};
+  return {
+    profile: { ...initialProfile(), ...s.profile },
+    periodDays: s.periodDays ?? {},
+    logs: s.logs ?? {},
+    intimacy: s.intimacy ?? {},
+    notifications: { ...initialNotifications, ...s.notifications },
+    prefs: { ...initialPrefs, ...s.prefs },
+  };
+}
+
+/**
+ * Перевод данных из старой (или более новой — после отката) версии формата.
+ * Важно, что функция есть всегда: без неё zustand при смене версии молча
+ * загрузил бы пустое состояние, а следующая запись затёрла бы данные.
+ */
+export function migrateData(saved: unknown, _from: number): PersistedData {
+  // Шагов миграции пока нет — формат с версии 1 менялся только добавлением полей.
+  return withDefaults(saved as Partial<PersistedData>);
+}
+
 const isEmptyLog = (l: LogInput) =>
   !l.mood && !l.energy && !l.pain && !l.appetite && l.sleepHours == null && !l.sleepQuality &&
   !l.symptoms.length && !l.customSymptoms.length && !l.notes?.trim();
@@ -158,22 +195,17 @@ export const useLunaStore = create<LunaState>()(
       resetAll: () =>
         set({ profile: initialProfile(), periodDays: {}, logs: {}, intimacy: {}, notifications: initialNotifications, prefs: initialPrefs }),
 
-      importSnapshot: (snap) =>
-        set({
-          profile: { ...initialProfile(), ...snap.profile },
-          periodDays: snap.periodDays ?? {},
-          logs: snap.logs ?? {},
-          intimacy: snap.intimacy ?? {},
-          notifications: { ...initialNotifications, ...snap.notifications },
-          prefs: { ...initialPrefs, ...snap.prefs },
-        }),
+      importSnapshot: (snap) => set(withDefaults(snap)),
 
       seedDemo: () => set(buildDemo(get().profile.name || 'Анна')),
     }),
     {
       name: 'luna-store-v1',
-      version: 1,
+      version: STORE_VERSION,
       storage: createJSONStorage(() => localStorage),
+      migrate: migrateData,
+      // По умолчанию zustand сливает только верхний уровень — новые поля в profile/prefs у старых данных были бы undefined
+      merge: (saved, current) => (saved ? { ...current, ...withDefaults(saved as Partial<PersistedData>) } : current),
       partialize: (s) => ({ profile: s.profile, periodDays: s.periodDays, logs: s.logs, intimacy: s.intimacy, notifications: s.notifications, prefs: s.prefs }),
     },
   ),

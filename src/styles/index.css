@@ -66,13 +66,16 @@
 @layer components {
   /* Светлый лавандовый фон приложения */
   .app-bg { background: var(--bg); }
-  /* Стеклянная карточка */
+  /*
+   * Стеклянная карточка. Без backdrop-filter: карточки лежат на плавном фоне, где размытие
+   * не видно (попиксельное сравнение — отличия ≤ 7/255), а на слабых Android каждая размытая
+   * карточка нагружает видеокарту при прокрутке. Настоящее размытие — только там, где под
+   * элементом движется содержимое: нижнее меню и затемнение под шторкой.
+   */
   .glass {
     @apply rounded-2.5xl border shadow-card;
     border-color: var(--glass-edge);
     background: linear-gradient(160deg, var(--glass-a) 0%, var(--glass-b) 100%);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
   }
   .glass-strong {
     @apply rounded-2.5xl border shadow-card;
