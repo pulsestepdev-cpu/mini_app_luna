@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addMonths, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns';
-import { CalendarCheck, ChevronLeft, ChevronRight, Droplet, Flower2 } from 'lucide-react';
+import { CalendarCheck, ChevronLeft, ChevronRight, Droplet, Flower2, Heart } from 'lucide-react';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { useCycle } from '@/features/cycle/useCycle';
@@ -12,12 +12,16 @@ import { cn } from '@/utils/cn';
 import { haptic } from '@/utils/feedback';
 import { Button, Card, Chip, PageHeader, Sheet, Toggle } from '@/components/ui';
 import { LogSummary } from '@/components/LogSummary';
+import { IntimacySheet, emptyIntimacy } from '@/components/IntimacySheet';
+import { intimacySummary } from '@/features/intimacy/intimacy';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function CalendarPage() {
   const { prediction: p, today, periodDays, profile } = useCycle();
   const logs = useLunaStore((s) => s.logs);
+  const intimacy = useLunaStore((s) => s.intimacy);
+  const intimacyOn = useLunaStore((s) => s.prefs.intimacy !== false);
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selected, setSelected] = useState<DateKey | null>(null);
 
@@ -74,6 +78,7 @@ export function CalendarPage() {
                 inMonth={d.startsWith(monthKey)}
                 isToday={d === today}
                 hasLog={!!logs[d]}
+                sex={intimacyOn && !!intimacy[d]?.sex}
                 onClick={() => setSelected(d)}
               />
             ))}
@@ -85,6 +90,12 @@ export function CalendarPage() {
             <Legend className="border border-dashed border-rose-400 bg-rose-100">{t.calendar.legendPredicted}</Legend>
             <Legend className="bg-sky-500">{t.calendar.legendFertile}</Legend>
             <Legend className="bg-amber-300">{t.calendar.legendPms}</Legend>
+            {intimacyOn && (
+              <span className="flex items-center gap-1">
+                <Heart size={11} className="fill-rose-500 text-rose-500" />
+                {t.intimacy.legend}
+              </span>
+            )}
           </div>
         </Card>
 
@@ -122,7 +133,7 @@ export function CalendarPage() {
         )}
       </div>
 
-      <DaySheet date={selected} marks={selected ? marks[selected] : undefined} onClose={() => setSelected(null)} />
+      <DaySheet key={selected ?? ''} date={selected} marks={selected ? marks[selected] : undefined} onClose={() => setSelected(null)} />
     </div>
   );
 }
@@ -136,7 +147,7 @@ function Legend({ className, children }: { className: string; children: string }
   );
 }
 
-function DayCell({ date, marks, inMonth, isToday, hasLog, onClick }: { date: DateKey; marks?: DayMarks; inMonth: boolean; isToday: boolean; hasLog: boolean; onClick: () => void }) {
+function DayCell({ date, marks, inMonth, isToday, hasLog, sex, onClick }: { date: DateKey; marks?: DayMarks; inMonth: boolean; isToday: boolean; hasLog: boolean; sex: boolean; onClick: () => void }) {
   const m = marks ?? {};
   let bg = '';
   if (m.period) bg = 'bg-rose-200 text-rose-600 font-semibold';
@@ -149,12 +160,13 @@ function DayCell({ date, marks, inMonth, isToday, hasLog, onClick }: { date: Dat
     <button onClick={() => { haptic.tap('soft'); onClick(); }} className={cn('tap flex flex-col items-center py-0.5', !inMonth && 'opacity-35')}>
       <span
         className={cn(
-          'flex h-9 w-9 items-center justify-center rounded-full text-[14px]',
+          'relative flex h-9 w-9 items-center justify-center rounded-full text-[14px]',
           bg,
           isToday && 'bg-gradient-to-b from-brand-500 to-brand-700 font-bold text-white shadow-soft ring-0 border-0',
         )}
       >
         {Number(date.slice(8))}
+        {sex && <Heart size={11} strokeWidth={2.5} className="absolute -right-0.5 -top-0.5 fill-rose-500 text-sheet" aria-label={t.intimacy.legend} />}
       </span>
       <span className={cn('mt-0.5 h-1 w-1 rounded-full', hasLog ? 'bg-plum-500' : 'bg-transparent')} />
     </button>
@@ -169,6 +181,10 @@ function DaySheet({ date, marks, onClose }: { date: DateKey | null; marks?: DayM
   const flow = useLunaStore((s) => (date ? s.periodDays[date] : undefined));
   const log = useLunaStore((s) => (date ? s.logs[date] : undefined));
   const setPeriodDay = useLunaStore((s) => s.setPeriodDay);
+  const intimacy = useLunaStore((s) => (date ? s.intimacy[date] : undefined));
+  const intimacyOn = useLunaStore((s) => s.prefs.intimacy !== false);
+  const setIntimacy = useLunaStore((s) => s.setIntimacy);
+  const [intimacyOpen, setIntimacyOpen] = useState(false);
   if (!date) return null;
   const future = diffDays(today, date) > 0;
   const m = marks ?? {};
@@ -214,11 +230,31 @@ function DaySheet({ date, marks, onClose }: { date: DateKey | null; marks?: DayM
             )}
           </div>
 
+          {intimacyOn && (
+            <button onClick={() => { haptic.tap(); setIntimacyOpen(true); }} className="tap glass-strong mb-4 flex w-full items-center gap-3 p-4 text-left">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+                <Heart size={18} fill="currentColor" fillOpacity={intimacy?.sex ? 0.9 : 0.25} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium">{t.intimacy.title}</span>
+                <span className="block text-[12.5px] text-ink-muted">{intimacy ? intimacySummary(intimacy) : t.intimacy.empty}</span>
+              </span>
+              <ChevronRight size={18} className="text-ink-faint" />
+            </button>
+          )}
+
           <div className="mb-2 text-[13px] font-semibold text-ink-soft">{t.calendar.dayLog}</div>
           {log ? <LogSummary log={log} /> : <p className="text-[14px] text-ink-muted">{t.calendar.noLog}</p>}
           <Button variant={log ? 'soft' : 'primary'} className="mt-4" onClick={() => nav(`/checkin?date=${date}`)}>
             {log ? t.calendar.editLog : t.calendar.addLog}
           </Button>
+          <IntimacySheet
+            open={intimacyOpen}
+            onClose={() => setIntimacyOpen(false)}
+            value={intimacy ?? emptyIntimacy(date)}
+            onChange={(v) => setIntimacy(date, v)}
+            date={date}
+          />
         </>
       )}
     </Sheet>

@@ -7,7 +7,8 @@
  */
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import type { DailyLog, DateKey, Flow, NotificationSettings, Preferences, Profile, Regularity } from '@/types';
+import type { DailyLog, DateKey, Flow, IntimacyLog, NotificationSettings, Preferences, Profile, Regularity } from '@/types';
+import { normalizeIntimacy, type IntimacyInput } from '@/features/intimacy/intimacy';
 import { addDaysKey, todayKey, userTimezone } from '@/utils/date';
 
 interface OnboardingInput {
@@ -26,6 +27,8 @@ export interface Snapshot {
   profile: Profile;
   periodDays: Record<DateKey, Flow>;
   logs: Record<DateKey, DailyLog>;
+  /** Нет в копиях, сделанных до появления раздела «Близость» */
+  intimacy?: Record<DateKey, IntimacyLog>;
   notifications: NotificationSettings;
   prefs: Preferences;
 }
@@ -34,6 +37,7 @@ interface LunaState {
   profile: Profile;
   periodDays: Record<DateKey, Flow>;
   logs: Record<DateKey, DailyLog>;
+  intimacy: Record<DateKey, IntimacyLog>;
   notifications: NotificationSettings;
   prefs: Preferences;
 
@@ -42,6 +46,8 @@ interface LunaState {
   setPeriodDay: (date: DateKey, flow: Flow | null) => void;
   saveLog: (log: LogInput) => void;
   deleteLog: (date: DateKey) => void;
+  /** Запись о близости за день; пустая (или null) — удаляет запись */
+  setIntimacy: (date: DateKey, entry: IntimacyInput | null) => void;
   updateNotifications: (patch: Partial<NotificationSettings>) => void;
   updatePrefs: (patch: Partial<Preferences>) => void;
   resetAll: () => void;
@@ -78,6 +84,7 @@ export const useLunaStore = create<LunaState>()(
       profile: initialProfile(),
       periodDays: {},
       logs: {},
+      intimacy: {},
       notifications: initialNotifications,
       prefs: initialPrefs,
 
@@ -137,17 +144,26 @@ export const useLunaStore = create<LunaState>()(
         set({ logs });
       },
 
+      setIntimacy: (date, entry) => {
+        const intimacy = { ...get().intimacy };
+        const clean = entry && normalizeIntimacy({ ...entry, date });
+        if (clean) intimacy[date] = { ...clean, updatedAt: new Date().toISOString() };
+        else delete intimacy[date];
+        set({ intimacy });
+      },
+
       updateNotifications: (patch) => set({ notifications: { ...get().notifications, ...patch } }),
       updatePrefs: (patch) => set({ prefs: { ...get().prefs, ...patch } }),
 
       resetAll: () =>
-        set({ profile: initialProfile(), periodDays: {}, logs: {}, notifications: initialNotifications, prefs: initialPrefs }),
+        set({ profile: initialProfile(), periodDays: {}, logs: {}, intimacy: {}, notifications: initialNotifications, prefs: initialPrefs }),
 
       importSnapshot: (snap) =>
         set({
           profile: { ...initialProfile(), ...snap.profile },
           periodDays: snap.periodDays ?? {},
           logs: snap.logs ?? {},
+          intimacy: snap.intimacy ?? {},
           notifications: { ...initialNotifications, ...snap.notifications },
           prefs: { ...initialPrefs, ...snap.prefs },
         }),
@@ -158,13 +174,13 @@ export const useLunaStore = create<LunaState>()(
       name: 'luna-store-v1',
       version: 1,
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ profile: s.profile, periodDays: s.periodDays, logs: s.logs, notifications: s.notifications, prefs: s.prefs }),
+      partialize: (s) => ({ profile: s.profile, periodDays: s.periodDays, logs: s.logs, intimacy: s.intimacy, notifications: s.notifications, prefs: s.prefs }),
     },
   ),
 );
 
 /** Демо-данные для локального просмотра (только dev-режим) */
-function buildDemo(name: string): Pick<LunaState, 'profile' | 'periodDays' | 'logs'> {
+function buildDemo(name: string): Pick<LunaState, 'profile' | 'periodDays' | 'logs' | 'intimacy'> {
   const today = todayKey();
   const lengths = [29, 27, 28, 30, 28, 27, 29, 28];
   // последний цикл начался 11 дней назад → сегодня 12-й день
@@ -174,6 +190,7 @@ function buildDemo(name: string): Pick<LunaState, 'profile' | 'periodDays' | 'lo
   const flows: Flow[] = ['medium', 'heavy', 'medium', 'light', 'spotting'];
   const periodDays: Record<DateKey, Flow> = {};
   const logs: Record<DateKey, DailyLog> = {};
+  const intimacy: Record<DateKey, IntimacyLog> = {};
   const tz = userTimezone();
   const mk = (date: DateKey, p: Partial<DailyLog>): DailyLog => ({
     date, symptoms: [], customSymptoms: [], timezone: tz, createdAt: date, updatedAt: date, ...p,
@@ -187,6 +204,16 @@ function buildDemo(name: string): Pick<LunaState, 'profile' | 'periodDays' | 'lo
     const d1 = addDaysKey(s, 0);
     if (d1 <= today) logs[d1] = mk(d1, { pain: ci % 3 === 0 ? 'moderate' : 'mild', energy: 'low', mood: 'sensitive', symptoms: ['cramps', 'fatigue'], sleepHours: 7, sleepQuality: 'ok' });
     const next = starts[ci + 1];
+    // близость: пара раз за цикл, влечение выше в середине цикла
+    const sexAt: [number, IntimacyLog['protection'], Partial<IntimacyLog>][] = [
+      [9, 'protected', { orgasm: true, libido: 'high' }],
+      [13, ci % 2 ? 'unprotected' : 'protected', { orgasm: ci % 3 !== 0, libido: 'high' }],
+      [21, 'protected', {}],
+    ];
+    for (const [off, protection, extra] of sexAt) {
+      const d = addDaysKey(s, off);
+      if (d <= today && (!next || d < next)) intimacy[d] = { date: d, sex: true, protection, ...extra, updatedAt: d };
+    }
     if (!next) return;
     // перед месячными — усталость, отёки, раздражение
     for (let k = 1; k <= 3; k++) {
@@ -209,10 +236,11 @@ function buildDemo(name: string): Pick<LunaState, 'profile' | 'periodDays' | 'lo
     profile: { ...initialProfile(), name, cycleLength: 28, periodLength: 5, regularity: 'regular', onboarded: true },
     periodDays,
     logs,
+    intimacy,
   };
 }
 
 export function getSnapshot(): Snapshot {
-  const { profile, periodDays, logs, notifications, prefs } = useLunaStore.getState();
-  return { v: 1, profile, periodDays, logs, notifications, prefs };
+  const { profile, periodDays, logs, intimacy, notifications, prefs } = useLunaStore.getState();
+  return { v: 1, profile, periodDays, logs, intimacy, notifications, prefs };
 }

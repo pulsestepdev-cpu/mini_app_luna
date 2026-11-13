@@ -5,6 +5,7 @@ import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { buildInsights, type Insight, type InsightTone } from '@/features/insights/rules';
 import { cn } from '@/utils/cn';
+import { todayKey } from '@/utils/date';
 import { EmptyState, PageHeader, SectionTitle } from '@/components/ui';
 import { Illustration } from '@/components/art';
 
@@ -19,7 +20,12 @@ export function InsightsPage() {
   const periodDays = useLunaStore((s) => s.periodDays);
   const logs = useLunaStore((s) => s.logs);
   const profile = useLunaStore((s) => s.profile);
-  const insights = useMemo(() => buildInsights(periodDays, logs, profile), [periodDays, logs, profile]);
+  const intimacy = useLunaStore((s) => s.intimacy);
+  const intimacyOn = useLunaStore((s) => s.prefs.intimacy !== false);
+  const insights = useMemo(
+    () => buildInsights(periodDays, logs, profile, todayKey(), intimacyOn ? intimacy : {}),
+    [periodDays, logs, profile, intimacy, intimacyOn],
+  );
 
   const main = insights.filter((i) => i.tone === 'positive' || i.tone === 'info');
   const attention = insights.filter((i) => i.tone === 'attention');

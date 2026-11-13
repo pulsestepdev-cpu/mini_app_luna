@@ -2,8 +2,9 @@
  * Инсайты на правилах (без ИИ). Каждый вывод указывает, на скольких
  * данных он основан. Формулировки — наблюдения, не диагнозы.
  */
-import type { DailyLog, DateKey, Flow, Mood, Profile } from '@/types';
-import { addDaysKey, daysWord, diffDays, plural, todayKey } from '@/utils/date';
+import type { DailyLog, DateKey, Flow, IntimacyLog, Mood, Profile } from '@/types';
+import { addDaysKey, daysWord, diffDays, fmtDayMonth, plural, todayKey } from '@/utils/date';
+import { isUnprotected, sexDays } from '@/features/intimacy/intimacy';
 import { computeStats, getPeriods, median, phaseOnDate, predict } from '@/features/cycle/engine';
 import { articleForPhase } from '@/content/articles';
 import { t } from '@/i18n';
@@ -31,6 +32,8 @@ export function buildInsights(
   logs: Record<DateKey, DailyLog>,
   profile: Profile,
   today: DateKey = todayKey(),
+  /** Записи о близости; пустой объект, если раздел выключен */
+  intimacy: Record<DateKey, IntimacyLog> = {},
 ): Insight[] {
   const out: Insight[] = [];
   const periods = getPeriods(periodDays).filter((p) => p.start <= today);
@@ -162,8 +165,62 @@ export function buildInsights(
     }
   }
 
-  // 8. Рекомендация под текущую фазу
   const pred = predict(periodDays, profile, today);
+
+  // 8. Задержка, а в этом цикле была близость — спокойно подсказать про тест
+  if (pred?.isLate) {
+    const sex = sexDays(intimacy, pred.lastStart, today);
+    if (sex.length) {
+      const risky = sex.some(isUnprotected);
+      out.unshift({
+        id: 'late-test',
+        tone: 'attention',
+        title: 'Задержка — можно сделать тест',
+        text: risky
+          ? `Задержка ${daysWord(pred.lateBy)}, а в этом цикле была близость без защиты или прерванный акт. Многие тесты на беременность показывают результат уже с первого дня задержки. Если тест отрицательный, а месячных всё нет, — повтори через несколько дней.`
+          : `Задержка ${daysWord(pred.lateBy)}. В этом цикле была близость — даже с защитой стоит сделать тест на беременность, чтобы спокойно исключить этот вариант.`,
+        basis: `По записям о близости с ${fmtDayMonth(pred.lastStart)}`,
+        articleSlug: 'late-period',
+      });
+    }
+  }
+
+  // 9. Боль во время близости
+  const sexAll = sexDays(intimacy, '0000-01-01', today);
+  const sexPain = sexAll.filter((e) => e.pain).length;
+  if (sexPain >= 2) {
+    out.push({
+      id: 'sex-pain',
+      tone: 'attention',
+      title: 'Боль во время близости',
+      text: `Ты ${sexPain} ${plural(sexPain, ['раз', 'раза', 'раз'])} отмечала боль или дискомфорт во время близости. Терпеть это не нужно — расскажи гинекологу: часто причину можно найти и убрать.`,
+      basis: basisOf(sexAll.length, ['записи', 'записей', 'записей']),
+      articleSlug: 'when-to-see-doctor',
+    });
+  }
+
+  // 10. Влечение по фазам
+  if (n >= 2) {
+    const high = Object.values(intimacy).filter((e) => e.libido === 'high' && e.date <= today);
+    if (high.length >= 3) {
+      const mid = high.filter((e) => {
+        const ph = phaseOnDate(periods, e.date, stats);
+        return ph === 'follicular' || ph === 'ovulatory';
+      }).length;
+      if (mid / high.length >= 0.6) {
+        out.push({
+          id: 'libido-phase',
+          tone: 'positive',
+          title: 'Пик влечения',
+          text: 'Высокое влечение ты чаще отмечаешь в первой половине цикла и около овуляции. Так влияют гормоны — и это совершенно нормально.',
+          basis: basisOf(high.length, RECORDS),
+          articleSlug: 'cycle-phases',
+        });
+      }
+    }
+  }
+
+  // 11. Рекомендация под текущую фазу
   if (pred) {
     const a = articleForPhase(pred.phase);
     out.push({

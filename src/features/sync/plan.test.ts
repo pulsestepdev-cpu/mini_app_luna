@@ -38,4 +38,11 @@ describe('план напоминаний для сервера', () => {
   it('фото профиля на сервер не уходит', () => {
     expect('photo' in serverSnapshot(snap([])).profile).toBe(false);
   });
+
+  it('записи о близости на сервер не уходят', () => {
+    const s = { ...snap([]), intimacy: { '2026-11-08': { date: '2026-11-08', sex: true, protection: 'unprotected' as const, updatedAt: '' } } };
+    const out = serverSnapshot(s);
+    expect('intimacy' in out).toBe(false);
+    expect(JSON.stringify(out)).not.toContain('unprotected');
+  });
 });

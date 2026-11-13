@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Camera, Check, FlaskConical, Globe, ImageUp, Info, Lock, MoonStar, Send, Smartphone, UserRound, Vibrate, Volume2 } from 'lucide-react';
+import { Bell, Camera, Check, FlaskConical, Globe, Heart, ImageUp, Info, Lock, MoonStar, Send, Smartphone, UserRound, Vibrate, Volume2 } from 'lucide-react';
 import { useHomeScreen } from '@/features/profile/homeScreen';
 import { HomeScreenHelp } from '@/components/HomeScreenHelp';
 import { t } from '@/i18n';
@@ -115,6 +115,17 @@ export function ProfilePage() {
             updatePrefs({ sounds: v });
             if (v) sound.chime(); // сразу дать услышать, как звучит
           }}
+        />
+      </div>
+
+      <h2 className="h-section mb-2.5 mt-6 px-1">{t.profile.sections}</h2>
+      <div className="glass overflow-hidden p-0">
+        <PrefRow
+          icon={<Heart size={20} />}
+          label={t.intimacy.setting}
+          hint={t.intimacy.settingHint}
+          checked={prefs.intimacy !== false}
+          onChange={(v) => updatePrefs({ intimacy: v })}
         />
       </div>
 

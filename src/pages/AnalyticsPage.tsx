@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarRange, ChevronRight, Droplet, FileText, Hourglass, Repeat, Sparkles } from 'lucide-react';
+import { CalendarRange, ChevronRight, Droplet, FileText, Heart, Hourglass, Repeat, ShieldOff, Sparkles } from 'lucide-react';
 import { t } from '@/i18n';
 import { useLunaStore } from '@/store/useLunaStore';
 import { computeAnalytics, type RangeKey } from '@/features/analytics/stats';
@@ -8,6 +8,7 @@ import { plural, todayKey } from '@/utils/date';
 import { Card, EmptyState, PageHeader, Segmented, SectionTitle } from '@/components/ui';
 import { LengthBars } from '@/components/LengthBars';
 import { Illustration } from '@/components/art';
+import { intimacyStats, LIBIDOS, PROTECTIONS } from '@/features/intimacy/intimacy';
 
 const RANGES: RangeKey[] = ['1m', '3m', '6m', '1y'];
 
@@ -18,6 +19,15 @@ export function AnalyticsPage() {
   const [range, setRange] = useState<RangeKey>('6m');
   const today = todayKey();
   const a = useMemo(() => computeAnalytics(periodDays, logs, range, today), [periodDays, logs, range, today]);
+  const intimacy = useLunaStore((s) => s.intimacy);
+  const intimacyOn = useLunaStore((s) => s.prefs.intimacy !== false);
+  const is = useMemo(() => intimacyStats(intimacy, a.from, today), [intimacy, a.from, today]);
+  const ti = t.intimacy;
+  const protectionRows = [...PROTECTIONS, 'unknown' as const]
+    .map((k) => ({ k, label: k === 'unknown' ? ti.unknown : ti.protection[k], count: is.protection[k] }))
+    .filter((r) => r.count > 0);
+  const libidoRows = LIBIDOS.map((k) => ({ k, label: ti.libidoLevel[k], count: is.libido[k] })).filter((r) => r.count > 0);
+  const showIntimacy = intimacyOn && (is.days > 0 || libidoRows.length > 0);
   const tA = t.analytics;
   const symptomLabel = (k: string, custom: boolean) => (custom ? k : (t.options.symptoms as Record<string, string>)[k] ?? k);
   const maxSym = a.symptomFreq[0]?.count ?? 1;
@@ -116,6 +126,42 @@ export function AnalyticsPage() {
             </Card>
           </>
         )}
+        {/* Близость — только на устройстве, на сервер не уходит */}
+        {showIntimacy && (
+          <>
+            <SectionTitle>{ti.title}</SectionTitle>
+            <div className="grid grid-cols-2 gap-3">
+              <Stat icon={<Heart size={18} />} tone="rose" value={String(is.days)} label={ti.daysCount} />
+              <Stat icon={<ShieldOff size={18} />} tone="amber" value={String(is.protection.unprotected + is.protection.withdrawal)} label={ti.unprotectedCount} />
+            </div>
+            {(protectionRows.length > 0 || libidoRows.length > 0) && (
+              <Card className="mt-3">
+                {protectionRows.length > 0 && (
+                  <>
+                    <div className="mb-2.5 text-[13px] font-semibold text-ink-soft">{ti.breakdown}</div>
+                    <div className="space-y-3">
+                      {protectionRows.map((r) => (
+                        <Bar key={r.k} label={r.label} count={r.count} max={is.days} />
+                      ))}
+                    </div>
+                  </>
+                )}
+                {libidoRows.length > 0 && (
+                  <>
+                    <div className={`mb-2.5 text-[13px] font-semibold text-ink-soft ${protectionRows.length ? 'mt-5' : ''}`}>{ti.libidoTitle}</div>
+                    <div className="space-y-3">
+                      {libidoRows.map((r) => (
+                        <Bar key={r.k} label={r.label} count={r.count} max={Math.max(...libidoRows.map((x) => x.count))} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </Card>
+            )}
+            <p className="mt-2 px-1 text-[11.5px] leading-snug text-ink-faint">{ti.notContraception}</p>
+          </>
+        )}
+
         <p className="mt-3 px-1 text-[11.5px] text-ink-faint">
           {tA.basedOn} {a.logsCount} {plural(a.logsCount, tA.recordsWord)}. {t.common.disclaimer}
         </p>

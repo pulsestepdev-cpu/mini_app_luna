@@ -15,12 +15,18 @@ export function ReportPage() {
   const periodDays = useLunaStore((s) => s.periodDays);
   const logs = useLunaStore((s) => s.logs);
   const profile = useLunaStore((s) => s.profile);
+  const intimacy = useLunaStore((s) => s.intimacy);
+  const intimacyOn = useLunaStore((s) => s.prefs.intimacy !== false);
+  const [withIntimacy, setWithIntimacy] = useState(false);
   const [range, setRange] = useState<ReportRange>('6m');
   const [withNotes, setWithNotes] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const today = todayKey();
-  const r = useMemo(() => buildReport(periodDays, logs, profile, range, today), [periodDays, logs, profile, range, today]);
+  const r = useMemo(
+    () => buildReport(periodDays, logs, profile, range, today, intimacyOn ? intimacy : {}),
+    [periodDays, logs, profile, range, today, intimacy, intimacyOn],
+  );
   const s = r.summary;
   const symptomLabel = (k: string, custom: boolean) => (custom ? k : (t.options.symptoms as Record<string, string>)[k] ?? k);
 
@@ -28,7 +34,7 @@ export function ReportPage() {
     setBusy(true);
     try {
       const { renderReportPdf } = await import('@/features/report/pdf');
-      const blob = await renderReportPdf(r, { notes: withNotes });
+      const blob = await renderReportPdf(r, { notes: withNotes, intimacy: withIntimacy });
       const res = await deliverFile(blob, `LUNA-otchet-${today}.pdf`, t.report.title);
       if (res !== 'cancelled') haptic.success();
     } catch {
@@ -106,6 +112,16 @@ export function ReportPage() {
           </div>
           <Toggle checked={withNotes} onChange={setWithNotes} label="Включить заметки" />
         </div>
+
+        {r.intimacy.days > 0 && (
+          <div className="glass mt-3 flex items-center gap-3 px-4 py-3.5">
+            <div className="min-w-0 flex-1">
+              <div className="text-[15px] text-ink">{t.intimacy.report}</div>
+              <div className="text-[12px] text-ink-muted">{t.intimacy.reportHint}</div>
+            </div>
+            <Toggle checked={withIntimacy} onChange={setWithIntimacy} label={t.intimacy.report} />
+          </div>
+        )}
 
         <Button className="mt-5" onClick={save} disabled={busy}>
           {busy ? <Loader2 size={18} className="animate-spin" /> : <FileDown size={18} />}

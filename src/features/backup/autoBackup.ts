@@ -58,7 +58,7 @@ export function startAutoBackup(): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const unsub = useLunaStore.subscribe((s, prev) => {
     const changed =
-      s.profile !== prev.profile || s.periodDays !== prev.periodDays || s.logs !== prev.logs ||
+      s.profile !== prev.profile || s.periodDays !== prev.periodDays || s.logs !== prev.logs || s.intimacy !== prev.intimacy ||
       s.notifications !== prev.notifications || s.prefs !== prev.prefs;
     if (!changed || !s.profile.onboarded) return;
     clearTimeout(timer);

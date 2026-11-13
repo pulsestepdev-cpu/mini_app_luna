@@ -2,7 +2,8 @@
  * Данные «Отчёта для врача» — чистая функция над записями.
  * Одинаково используется для экрана предпросмотра и для PDF.
  */
-import type { DailyLog, DateKey, Flow, Mood, Profile } from '@/types';
+import type { DailyLog, DateKey, Flow, IntimacyLog, Mood, Profile } from '@/types';
+import { intimacyStats } from '@/features/intimacy/intimacy';
 import { computeAnalytics, type RangeKey } from '@/features/analytics/stats';
 import { getPeriods, MAX_CYCLE, MIN_CYCLE, predict } from '@/features/cycle/engine';
 import { diffDays } from '@/utils/date';
@@ -39,6 +40,8 @@ export interface ReportData {
   pain: { moderate: number; severe: number };
   notes: { date: DateKey; text: string }[];
   logsCount: number;
+  /** Близость за период (в PDF — только если пользователь включил) */
+  intimacy: { days: number; unprotected: number; pain: number; lastUnprotected: DateKey | null };
 }
 
 const FLOW_RANK: Record<Flow, number> = { spotting: 0, light: 1, medium: 2, heavy: 3 };
@@ -49,6 +52,7 @@ export function buildReport(
   profile: Profile,
   range: ReportRange,
   today: DateKey,
+  intimacy: Record<DateKey, IntimacyLog> = {},
 ): ReportData {
   const a = computeAnalytics(periodDays, logs, range, today);
   const inRange = (k: DateKey) => k >= a.from && k <= today;
@@ -84,6 +88,7 @@ export function buildReport(
   notes.sort((x, y) => (x.date < y.date ? 1 : -1));
 
   const p = predict(periodDays, profile, today);
+  const is = intimacyStats(intimacy, a.from, today);
   return {
     name: profile.name,
     generatedAt: today,
@@ -105,5 +110,6 @@ export function buildReport(
     pain: { moderate, severe },
     notes,
     logsCount: a.logsCount,
+    intimacy: { days: is.days, unprotected: is.protection.unprotected + is.protection.withdrawal, pain: is.pain, lastUnprotected: is.lastUnprotected },
   };
 }

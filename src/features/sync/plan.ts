@@ -42,7 +42,10 @@ export function buildPlan(s: Snapshot, today: DateKey): ReminderPlan {
   };
 }
 
-/** Что уходит на сервер: без фото профиля и настроек интерфейса — только то, что нужно для напоминаний и отчётов */
+/**
+ * Что уходит на сервер: только то, что нужно для напоминаний и отчётов.
+ * Без фото профиля, настроек интерфейса и записей о близости (они не покидают устройство и облако Telegram).
+ */
 export function serverSnapshot(s: Snapshot) {
   const { photo: _photo, ...profile } = s.profile;
   return { profile, periodDays: s.periodDays, logs: s.logs, notifications: s.notifications };

@@ -1,14 +1,16 @@
 import { useState, type ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Droplet, HeartPulse, Minus, Moon, Plus, Smile, UtensilsCrossed, Zap } from 'lucide-react';
+import { ChevronRight, Droplet, Heart, HeartPulse, Minus, Moon, Plus, Smile, UtensilsCrossed, Zap } from 'lucide-react';
 import { t } from '@/i18n';
 import { haptic, sound } from '@/utils/feedback';
 import { useLunaStore, type LogInput } from '@/store/useLunaStore';
 import type { Appetite, DateKey, Energy, Flow, Mood, Pain, SleepQuality } from '@/types';
 import { fmtDayMonth, todayKey } from '@/utils/date';
 import { Button, Chip, IconTile, PageHeader, Sheet } from '@/components/ui';
+import { IntimacySheet, emptyIntimacy } from '@/components/IntimacySheet';
+import { intimacySummary, normalizeIntimacy, type IntimacyInput } from '@/features/intimacy/intimacy';
 
-type SheetKind = 'mood' | 'energy' | 'pain' | 'sleep' | 'appetite' | 'flow' | null;
+type SheetKind = 'mood' | 'energy' | 'pain' | 'sleep' | 'appetite' | 'flow' | 'intimacy' | null;
 type FlowChoice = Flow | 'none';
 
 const MOODS: Mood[] = ['good', 'neutral', 'sad', 'irritable', 'anxious', 'sensitive'];
@@ -31,6 +33,9 @@ export function CheckInPage() {
   const saveLog = useLunaStore((s) => s.saveLog);
   const deleteLog = useLunaStore((s) => s.deleteLog);
   const setPeriodDay = useLunaStore((s) => s.setPeriodDay);
+  const existingIntimacy = useLunaStore((s) => s.intimacy[date]);
+  const intimacyOn = useLunaStore((s) => s.prefs.intimacy !== false);
+  const setIntimacy = useLunaStore((s) => s.setIntimacy);
 
   const [log, setLog] = useState<LogInput>(() =>
     existing
@@ -38,6 +43,8 @@ export function CheckInPage() {
       : { date, symptoms: [], customSymptoms: [] },
   );
   const [flow, setFlow] = useState<FlowChoice | undefined>(existingFlow);
+  const [intimacy, setIntimacyDraft] = useState<IntimacyInput>(() => (existingIntimacy ? { ...existingIntimacy } : emptyIntimacy(date)));
+  const intimacyClean = normalizeIntimacy(intimacy);
   const [sheet, setSheet] = useState<SheetKind>(null);
   const [otherOpen, setOtherOpen] = useState(false);
   const [otherText, setOtherText] = useState('');
@@ -57,6 +64,8 @@ export function CheckInPage() {
     sound.chime();
     saveLog(log);
     if (flow !== undefined) setPeriodDay(date, flow === 'none' ? null : flow);
+    const before = existingIntimacy ? normalizeIntimacy(existingIntimacy) : null;
+    if (intimacyOn && JSON.stringify(intimacyClean) !== JSON.stringify(before)) setIntimacy(date, intimacyClean);
     nav('/success', { replace: true });
   };
 
@@ -111,6 +120,21 @@ export function CheckInPage() {
           </div>
         )}
 
+        {intimacyOn && (
+          <>
+            <h2 className="h-section mb-3 mt-6 px-1">{t.intimacy.title}</h2>
+            <button onClick={() => setSheet('intimacy')} className="tap glass flex w-full items-center gap-3 p-4 text-left">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+                <Heart size={19} fill="currentColor" fillOpacity={intimacyClean?.sex ? 0.9 : 0.25} />
+              </span>
+              <span className={`min-w-0 flex-1 text-[15px] ${intimacyClean ? 'font-medium text-ink' : 'text-ink-muted'}`}>
+                {intimacyClean ? intimacySummary(intimacyClean) : t.intimacy.empty}
+              </span>
+              <ChevronRight size={18} className="text-ink-faint" />
+            </button>
+          </>
+        )}
+
         <div className="glass mt-6 p-4">
           <label className="mb-2 block text-[13px] text-ink-soft">{t.checkin.notes}</label>
           <textarea
@@ -145,6 +169,8 @@ export function CheckInPage() {
       <OptionsSheet open={sheet === 'pain'} title={t.checkin.pain} onClose={() => setSheet(null)} options={PAIN.map((v) => ({ v, label: o.pain[v] }))} value={log.pain} onPick={(pain) => patch({ pain })} />
       <OptionsSheet open={sheet === 'appetite'} title={t.checkin.appetite} onClose={() => setSheet(null)} options={APPETITE.map((v) => ({ v, label: o.appetite[v] }))} value={log.appetite} onPick={(appetite) => patch({ appetite })} />
       <OptionsSheet open={sheet === 'flow'} title={t.checkin.flow} onClose={() => setSheet(null)} options={FLOWS.map((v) => ({ v, label: o.flow[v] }))} value={flow} onPick={(f) => setFlow(f ?? undefined)} />
+
+      <IntimacySheet open={sheet === 'intimacy'} onClose={() => setSheet(null)} value={intimacy} onChange={setIntimacyDraft} date={date} />
 
       <Sheet open={sheet === 'sleep'} onClose={() => setSheet(null)} title={t.checkin.sleep}>
         <div className="mb-2 text-[13px] text-ink-muted">{t.checkin.sleepHours}</div>

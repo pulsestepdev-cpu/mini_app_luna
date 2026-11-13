@@ -25,6 +25,29 @@ export interface DailyLog {
   updatedAt: string;
 }
 
+/** Защита при близости. withdrawal — прерванный акт (это не защита, но и не «без защиты» в чистом виде) */
+export type Protection = 'protected' | 'unprotected' | 'withdrawal';
+/** Сексуальное влечение */
+export type Libido = 'low' | 'medium' | 'high';
+
+/**
+ * Близость за день (одна запись на день, как в Apple Health / Clue).
+ * Самые чувствительные данные: хранятся только на устройстве и в копии
+ * в облаке Telegram, на сервер LUNA и партнёру не уходят.
+ */
+export interface IntimacyLog {
+  date: DateKey;
+  /** Была близость. false — запись только о влечении */
+  sex: boolean;
+  /** Не указано — значит, не выбрано */
+  protection?: Protection;
+  orgasm?: boolean;
+  /** Боль или дискомфорт во время близости — важно для врача */
+  pain?: boolean;
+  libido?: Libido;
+  updatedAt: string;
+}
+
 export interface Profile {
   name: string;
   cycleLength: number | null;
@@ -52,6 +75,8 @@ export interface Preferences {
   sounds: boolean;
   /** auto — как в Telegram / системе */
   theme: ThemePref;
+  /** Раздел «Близость» (по умолчанию включён; undefined = да). Выключение только прячет, записи остаются */
+  intimacy?: boolean;
 }
 
 export type ThemePref = 'auto' | 'light' | 'dark';

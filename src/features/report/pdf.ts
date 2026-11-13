@@ -4,7 +4,7 @@
  */
 import type { ReportData } from './report';
 import { t } from '@/i18n';
-import { daysWord, fmt, fmtRange } from '@/utils/date';
+import { daysWord, fmt, fmtRange, plural } from '@/utils/date';
 
 const PLUM: [number, number, number] = [94, 56, 150];
 const INK: [number, number, number] = [43, 33, 64];
@@ -20,7 +20,7 @@ async function fontBase64(path: string): Promise<string> {
 const d = (k: string) => fmt(k, 'd MMMM yyyy');
 const symptomLabel = (key: string, custom: boolean) => (custom ? key : (t.options.symptoms as Record<string, string>)[key] ?? key);
 
-export async function renderReportPdf(r: ReportData, opts: { notes: boolean }): Promise<Blob> {
+export async function renderReportPdf(r: ReportData, opts: { notes: boolean; intimacy?: boolean }): Promise<Blob> {
   const [{ jsPDF }, { default: autoTable }, regular, bold] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable'),
@@ -130,6 +130,18 @@ export async function renderReportPdf(r: ReportData, opts: { notes: boolean }): 
   y += 9;
   if (r.symptoms.length) table(['Симптом', 'Дней отмечено'], r.symptoms.slice(0, 12).map((x) => [symptomLabel(x.key, x.custom), x.count]), [110]);
   if (r.moods.length) table(['Настроение', 'Дней отмечено'], r.moods.map((x) => [t.options.mood[x.key], x.count]), [110]);
+
+  // Близость — только если пользователь сам включил
+  if (opts.intimacy && r.intimacy.days > 0) {
+    const x = r.intimacy;
+    section('Сексуальная активность', ROW * 4);
+    table(null, [
+      ['Дней с близостью', String(x.days)],
+      ['Из них без защиты (вкл. прерванный акт)', String(x.unprotected)],
+      ['Последний раз без защиты', x.lastUnprotected ? d(x.lastUnprotected) : '—'],
+      ['Боль или дискомфорт при близости', x.pain ? `${x.pain} ${plural(x.pain, ['раз', 'раза', 'раз'])}` : 'не отмечались'],
+    ], [90]);
+  }
 
   // Заметки — только если пользователь сам включил
   if (opts.notes && r.notes.length) {
