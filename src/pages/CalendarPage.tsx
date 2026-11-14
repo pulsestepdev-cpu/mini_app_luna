@@ -7,7 +7,7 @@ import { useLunaStore } from '@/store/useLunaStore';
 import { useCycle } from '@/features/cycle/useCycle';
 import { buildDayMarks, type DayMarks } from '@/features/cycle/engine';
 import type { DateKey, Flow } from '@/types';
-import { addDaysKey, daysWord, diffDays, fmt, fmtRange, toKey } from '@/utils/date';
+import { WEEK_STARTS_ON, addDaysKey, daysWord, diffDays, fmt, fmtRange, toKey } from '@/utils/date';
 import { cn } from '@/utils/cn';
 import { haptic } from '@/utils/feedback';
 import { Button, Card, Chip, PageHeader, Sheet, Toggle } from '@/components/ui';
@@ -16,6 +16,8 @@ import { IntimacySheet, emptyIntimacy } from '@/components/IntimacySheet';
 import { intimacySummary } from '@/features/intimacy/intimacy';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/** Подписи дней недели, начиная с WEEK_STARTS_ON (в t.calendar.weekdays они в порядке Date.getDay()) */
+const WEEKDAY_LABELS = [...t.calendar.weekdays.slice(WEEK_STARTS_ON), ...t.calendar.weekdays.slice(0, WEEK_STARTS_ON)];
 
 export function CalendarPage() {
   const { prediction: p, today, periodDays, profile } = useCycle();
@@ -25,8 +27,8 @@ export function CalendarPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selected, setSelected] = useState<DateKey | null>(null);
 
-  const gridStart = toKey(startOfWeek(month, { weekStartsOn: 1 }));
-  const gridEnd = toKey(endOfWeek(endOfMonth(month), { weekStartsOn: 1 }));
+  const gridStart = toKey(startOfWeek(month, { weekStartsOn: WEEK_STARTS_ON }));
+  const gridEnd = toKey(endOfWeek(endOfMonth(month), { weekStartsOn: WEEK_STARTS_ON }));
   const days = useMemo(() => {
     const out: DateKey[] = [];
     for (let d = gridStart; d <= gridEnd; d = addDaysKey(d, 1)) out.push(d);
@@ -62,7 +64,7 @@ export function CalendarPage() {
           </div>
 
           <div className="grid grid-cols-7 text-center text-[12px] text-ink-muted">
-            {t.calendar.weekdays.map((w) => (
+            {WEEKDAY_LABELS.map((w) => (
               <div key={w} className="pb-2">
                 {w}
               </div>

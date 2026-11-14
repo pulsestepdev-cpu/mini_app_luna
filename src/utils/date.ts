@@ -25,6 +25,9 @@ export const addDaysKey = (k: DateKey, n: number): DateKey => {
 /** Сколько календарных дней от a до b (b - a) */
 export const diffDays = (a: DateKey, b: DateKey): number => utcDay(b) - utcDay(a);
 
+/** Первый день недели в календаре (как Date.getDay(): 0 = воскресенье) — в Израиле неделя начинается с воскресенья */
+export const WEEK_STARTS_ON = 0 as const;
+
 export const fmt = (k: DateKey, pattern: string): string => format(fromKey(k), pattern, { locale: ru });
 /** «24 апреля» */
 export const fmtDayMonth = (k: DateKey) => fmt(k, 'd MMMM');
